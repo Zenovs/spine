@@ -4,6 +4,12 @@ import { useParams, useRouter } from 'next/navigation';
 import { upload } from '@vercel/blob/client';
 import { SiteHeader, SiteFooter } from '@/components/SiteHeader';
 
+function formatETA(seconds: number) {
+  if (seconds < 5) return 'wenige Sekunden';
+  if (seconds < 60) return `${Math.round(seconds)} Sek.`;
+  return `${Math.ceil(seconds / 60)} Min.`;
+}
+
 const IMAGE_TEMPLATES = [
   { id: 't1', label: 'Weinberg', url: 'https://images.unsplash.com/photo-1506377247377-2a5b3b417ebb?w=400&h=300&fit=crop' },
   { id: 't2', label: 'Weinglas', url: 'https://images.unsplash.com/photo-1510812431401-41d2bd2722f3?w=400&h=300&fit=crop' },
@@ -29,11 +35,14 @@ export default function CreatePage() {
   const [imagePreview, setImagePreview] = useState('');
   const [loading, setLoading] = useState(false);
   const [uploadProgress, setUploadProgress] = useState('');
+  const [uploadPercent, setUploadPercent] = useState(0);
+  const [uploadETA, setUploadETA] = useState('');
   const [error, setError] = useState('');
   const [step, setStep] = useState<1 | 2 | 3>(1);
 
   const videoInputRef = useRef<HTMLInputElement>(null);
   const imageInputRef = useRef<HTMLInputElement>(null);
+  const uploadStartRef = useRef<number>(0);
 
   function handleVideoChange(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
@@ -66,22 +75,45 @@ export default function CreatePage() {
 
       if (videoFile) {
         setUploadProgress('Video wird hochgeladen…');
+        setUploadPercent(0);
+        setUploadETA('');
+        uploadStartRef.current = Date.now();
         const ext = videoFile.name.split('.').pop() || 'mp4';
         const blob = await upload(
           `videos/${Date.now()}.${ext}`,
           videoFile,
-          { access: 'public', handleUploadUrl: '/api/upload' }
+          {
+            access: 'public',
+            handleUploadUrl: '/api/upload',
+            onUploadProgress: ({ percentage }) => {
+              setUploadPercent(Math.round(percentage));
+              const elapsed = (Date.now() - uploadStartRef.current) / 1000;
+              if (percentage > 2 && elapsed > 0.5) {
+                const total = elapsed / (percentage / 100);
+                setUploadETA(formatETA(total - elapsed));
+              }
+            },
+          }
         );
         videoUrl = blob.url;
+        setUploadETA('');
       }
 
       if (imageSource === 'upload' && imageFile) {
         setUploadProgress('Bild wird hochgeladen…');
+        setUploadPercent(0);
+        uploadStartRef.current = Date.now();
         const ext = imageFile.name.split('.').pop() || 'jpg';
         const blob = await upload(
           `images/${Date.now()}.${ext}`,
           imageFile,
-          { access: 'public', handleUploadUrl: '/api/upload' }
+          {
+            access: 'public',
+            handleUploadUrl: '/api/upload',
+            onUploadProgress: ({ percentage }) => {
+              setUploadPercent(Math.round(percentage));
+            },
+          }
         );
         imageUrl = blob.url;
       } else if (imageSource === 'template' && selectedTemplate) {
@@ -89,6 +121,7 @@ export default function CreatePage() {
       }
 
       setUploadProgress('Botschaft wird gespeichert…');
+      setUploadPercent(0);
       const res = await fetch('/api/content/save', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -103,6 +136,8 @@ export default function CreatePage() {
     } finally {
       setLoading(false);
       setUploadProgress('');
+      setUploadPercent(0);
+      setUploadETA('');
     }
   }
 
@@ -211,7 +246,7 @@ export default function CreatePage() {
                   </div>
                 )}
 
-                <div style={{ display: 'flex', gap: 10 }}>
+                <div className="btn-row">
                   <button type="button" className="btn btn-ghost" onClick={() => setStep(1)}
                     style={{ flex: 1, justifyContent: 'center', fontSize: 12 }}>← Zurück</button>
                   <button type="button" className="btn btn-accent" onClick={() => setStep(3)}
@@ -290,13 +325,35 @@ export default function CreatePage() {
                   </p>
                 </div>
 
+                {/* Upload progress */}
                 {loading && uploadProgress && (
-                  <div style={{ textAlign: 'center', fontFamily: 'var(--sans)', fontSize: 13, color: 'var(--ink-muted)', marginBottom: 14, letterSpacing: '0.06em' }}>
-                    {uploadProgress}
+                  <div style={{ marginBottom: 16 }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
+                      <span style={{ fontFamily: 'var(--sans)', fontSize: 12, color: 'var(--ink-muted)', letterSpacing: '0.06em' }}>
+                        {uploadProgress}
+                      </span>
+                      {uploadPercent > 0 && (
+                        <span style={{ fontFamily: 'var(--sans)', fontSize: 13, fontWeight: 600, color: 'var(--ink)' }}>
+                          {uploadPercent} %
+                        </span>
+                      )}
+                    </div>
+                    <div className="progress-bar-wrap">
+                      {uploadPercent > 0 ? (
+                        <div className="progress-bar-fill" style={{ width: `${uploadPercent}%` }} />
+                      ) : (
+                        <div className="progress-bar-indeterminate" style={{ width: '40%' }} />
+                      )}
+                    </div>
+                    {uploadETA && (
+                      <div style={{ textAlign: 'right', fontFamily: 'var(--sans)', fontSize: 11, color: 'var(--ink-muted)', marginTop: 5 }}>
+                        noch ca. {uploadETA}
+                      </div>
+                    )}
                   </div>
                 )}
 
-                <div style={{ display: 'flex', gap: 10 }}>
+                <div className="btn-row">
                   <button type="button" className="btn btn-ghost" onClick={() => setStep(2)} disabled={loading}
                     style={{ flex: 1, justifyContent: 'center', fontSize: 12 }}>← Zurück</button>
                   <button type="submit" className="btn btn-accent" disabled={loading || !canProceedStep1}
