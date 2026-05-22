@@ -16,7 +16,7 @@ const IMAGE_TEMPLATES = [
   { id: 't2', label: 'Weinglas', url: 'https://images.unsplash.com/photo-1510812431401-41d2bd2722f3?w=400&h=300&fit=crop' },
   { id: 't3', label: 'Flaschen', url: 'https://images.unsplash.com/photo-1553361371-9b22f78e8b1d?w=400&h=300&fit=crop' },
   { id: 't4', label: 'Reben', url: 'https://images.unsplash.com/photo-1474722883778-792e7990302f?w=400&h=300&fit=crop' },
-  { id: 't5', label: 'Herbst', url: 'https://images.unsplash.com/photo-1508004680771-708b02f4fb44?w=400&h=300&fit=crop' },
+  { id: 't5', label: 'Herbst', url: 'https://images.unsplash.com/photo-1516912481808-3406841bd33c?w=400&h=300&fit=crop' },
   { id: 't6', label: 'Keller', url: 'https://images.unsplash.com/photo-1504279807002-09854ccc9b6c?w=400&h=300&fit=crop' },
 ];
 
@@ -40,6 +40,10 @@ export default function CreatePage() {
   const [uploadETA, setUploadETA] = useState('');
   const [error, setError] = useState('');
   const [step, setStep] = useState<1 | 2 | 3>(1);
+
+  const [videoFit, setVideoFit] = useState<'contain' | 'cover'>('contain');
+  const [videoObjPos, setVideoObjPos] = useState({ x: 50, y: 50 });
+  const videoDragRef = useRef<{ startX: number; startY: number; posX: number; posY: number } | null>(null);
 
   const videoInputRef = useRef<HTMLInputElement>(null);
   const imageInputRef = useRef<HTMLInputElement>(null);
@@ -75,14 +79,26 @@ export default function CreatePage() {
       let imageUrl = '';
 
       if (videoFile) {
-        // Compress if > 20 MB — shows its own stage/progress feedback
-        const toUpload = await compressVideo(
-          videoFile,
-          (stage) => { setUploadProgress(stage); setUploadPercent(0); setUploadETA(''); },
-          (pct) => setUploadPercent(pct),
-        );
+        let toUpload = videoFile;
+        try {
+          const result = await compressVideo(
+            videoFile,
+            (stage) => { setUploadProgress(stage); setUploadPercent(0); setUploadETA(''); },
+            (pct) => setUploadPercent(pct),
+          );
+          toUpload = result.file;
+          if (result.didCompress) {
+            setUploadProgress(
+              `Komprimiert: ${result.originalMB.toFixed(0)} MB → ${result.compressedMB.toFixed(0)} MB · Hochladen…`,
+            );
+          } else {
+            setUploadProgress('Video wird hochgeladen…');
+          }
+        } catch {
+          setUploadProgress('Komprimierung fehlgeschlagen · lade Original hoch…');
+        }
 
-        setUploadProgress('Video wird hochgeladen…');
+        setUploadProgress(prev => prev || 'Video wird hochgeladen…');
         setUploadPercent(0);
         setUploadETA('');
         uploadStartRef.current = Date.now();
@@ -236,12 +252,53 @@ export default function CreatePage() {
 
                 {videoPreview ? (
                   <div style={{ marginBottom: 20 }}>
-                    <video src={videoPreview} controls playsInline
-                      style={{ width: '100%', borderRadius: 3, background: '#111', maxHeight: 280, objectFit: 'contain' }} />
-                    <button type="button" onClick={() => { setVideoFile(null); setVideoPreview(''); }}
-                      style={{ marginTop: 10, background: 'none', border: 'none', fontFamily: 'var(--sans)', fontSize: 12, letterSpacing: '0.12em', textTransform: 'uppercase', color: 'var(--ink-muted)', cursor: 'pointer' }}>
-                      Video entfernen ×
-                    </button>
+                    {/* Video box with drag-to-pan in cover mode */}
+                    <div
+                      style={{ position: 'relative', borderRadius: 3, overflow: 'hidden', background: '#111', height: 280, cursor: videoFit === 'cover' ? 'grab' : 'default' }}
+                      onTouchStart={e => {
+                        if (videoFit !== 'cover') return;
+                        const t = e.touches[0];
+                        videoDragRef.current = { startX: t.clientX, startY: t.clientY, posX: videoObjPos.x, posY: videoObjPos.y };
+                      }}
+                      onTouchMove={e => {
+                        if (!videoDragRef.current || videoFit !== 'cover') return;
+                        const t = e.touches[0];
+                        const dx = t.clientX - videoDragRef.current.startX;
+                        const dy = t.clientY - videoDragRef.current.startY;
+                        setVideoObjPos({
+                          x: Math.max(0, Math.min(100, videoDragRef.current.posX - dx * 0.25)),
+                          y: Math.max(0, Math.min(100, videoDragRef.current.posY - dy * 0.25)),
+                        });
+                      }}
+                      onTouchEnd={() => { videoDragRef.current = null; }}
+                    >
+                      <video
+                        src={videoPreview}
+                        controls={videoFit === 'contain'}
+                        playsInline
+                        style={{
+                          width: '100%', height: '100%', display: 'block',
+                          objectFit: videoFit,
+                          objectPosition: `${videoObjPos.x}% ${videoObjPos.y}%`,
+                        }}
+                      />
+                      {videoFit === 'cover' && (
+                        <div style={{ position: 'absolute', bottom: 8, left: '50%', transform: 'translateX(-50%)', background: 'rgba(0,0,0,0.55)', color: 'white', fontFamily: 'var(--sans)', fontSize: 10, letterSpacing: '0.12em', textTransform: 'uppercase', padding: '4px 10px', borderRadius: 999, pointerEvents: 'none' }}>
+                          Ziehen zum Ausrichten
+                        </div>
+                      )}
+                    </div>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: 8 }}>
+                      <button type="button"
+                        onClick={() => { setVideoFit(f => f === 'contain' ? 'cover' : 'contain'); setVideoObjPos({ x: 50, y: 50 }); }}
+                        style={{ background: 'none', border: '1px solid var(--rule)', borderRadius: 999, fontFamily: 'var(--sans)', fontSize: 11, letterSpacing: '0.1em', textTransform: 'uppercase', color: 'var(--ink-muted)', cursor: 'pointer', padding: '4px 12px' }}>
+                        {videoFit === 'contain' ? '⊡ Ausfüllen' : '⊞ Anpassen'}
+                      </button>
+                      <button type="button" onClick={() => { setVideoFile(null); setVideoPreview(''); setVideoFit('contain'); setVideoObjPos({ x: 50, y: 50 }); }}
+                        style={{ background: 'none', border: 'none', fontFamily: 'var(--sans)', fontSize: 12, letterSpacing: '0.12em', textTransform: 'uppercase', color: 'var(--ink-muted)', cursor: 'pointer' }}>
+                        Entfernen ×
+                      </button>
+                    </div>
                   </div>
                 ) : (
                   <div className="upload-zone" style={{ marginBottom: 20 }} onClick={() => videoInputRef.current?.click()}>
