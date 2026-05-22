@@ -1,8 +1,8 @@
 import { Resend } from 'resend';
 
-const resend = new Resend(process.env.RESEND_API_KEY);
-
 export async function sendVerificationEmail(email: string, code: string) {
+  if (!process.env.RESEND_API_KEY) return;
+  const resend = new Resend(process.env.RESEND_API_KEY);
   const { error } = await resend.emails.send({
     from: process.env.EMAIL_FROM || 'noreply@weinbotschaft.ch',
     to: email,

@@ -14,6 +14,7 @@ export default function VerifyPage() {
   const [verifyCode, setVerifyCode] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [demoCode, setDemoCode] = useState('');
 
   async function sendCode(e: React.FormEvent) {
     e.preventDefault();
@@ -27,6 +28,10 @@ export default function VerifyPage() {
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || 'Fehler beim Senden');
+      if (data.demoCode) {
+        setDemoCode(data.demoCode);
+        setVerifyCode(data.demoCode);
+      }
       setStep('code');
     } catch (e: unknown) {
       setError(e instanceof Error ? e.message : 'Unbekannter Fehler');
@@ -106,10 +111,17 @@ export default function VerifyPage() {
                 <h1 className="section-title" style={{ marginBottom: 12 }}>
                   Code <em>eingeben</em>
                 </h1>
-                <p style={{ fontFamily: 'var(--sans)', fontSize: 15, color: 'var(--ink-soft)', lineHeight: 1.65, marginBottom: 28 }}>
-                  Wir haben einen 6-stelligen Code an <strong style={{ color: 'var(--ink)' }}>{email}</strong> gesendet.
-                  Gültig für 15 Minuten.
-                </p>
+                {demoCode ? (
+                  <div style={{ background: 'rgba(91,94,62,0.08)', border: '1px solid rgba(91,94,62,0.25)', padding: '12px 16px', marginBottom: 24, borderRadius: 2 }}>
+                    <p style={{ fontFamily: 'var(--sans)', fontSize: 12, letterSpacing: '0.12em', textTransform: 'uppercase', color: 'var(--olive)', marginBottom: 6 }}>Demo-Modus — kein E-Mail-Versand konfiguriert</p>
+                    <p style={{ fontFamily: 'var(--sans)', fontSize: 14, color: 'var(--ink-soft)' }}>Dein Code wurde automatisch eingetragen:</p>
+                  </div>
+                ) : (
+                  <p style={{ fontFamily: 'var(--sans)', fontSize: 15, color: 'var(--ink-soft)', lineHeight: 1.65, marginBottom: 28 }}>
+                    Wir haben einen 6-stelligen Code an <strong style={{ color: 'var(--ink)' }}>{email}</strong> gesendet.
+                    Gültig für 15 Minuten.
+                  </p>
+                )}
 
                 <div style={{ marginBottom: 20 }}>
                   <label className="input-label" htmlFor="vcode">Verifizierungscode</label>

@@ -38,8 +38,13 @@ export async function POST(req: NextRequest) {
       VALUES (${qr.id}, ${email}, ${verifyCode}, ${expiresAt.toISOString()})
     `;
 
-    await sendVerificationEmail(email, verifyCode);
+    const demoMode = !process.env.RESEND_API_KEY;
+    if (demoMode) {
+      // No email configured — return code directly for demo/testing
+      return NextResponse.json({ ok: true, demoCode: verifyCode });
+    }
 
+    await sendVerificationEmail(email, verifyCode);
     return NextResponse.json({ ok: true });
   } catch (e: unknown) {
     console.error('verify/send error:', e);
