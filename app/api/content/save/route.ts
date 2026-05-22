@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import sql, { getQRCode } from '@/lib/db';
+import db, { getQRCode } from '@/lib/db';
 import { cookies } from 'next/headers';
 
 export async function POST(req: NextRequest) {
@@ -28,6 +28,7 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Dieser QR-Code ist bereits gesperrt' }, { status: 409 });
     }
 
+    const sql = db();
     // Save content
     await sql`
       INSERT INTO content (qr_code_id, email, sender_name, message, video_url, image_url)

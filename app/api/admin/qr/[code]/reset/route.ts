@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import sql, { getQRCode } from '@/lib/db';
+import db, { getQRCode } from '@/lib/db';
 import { getAdminFromRequest } from '@/lib/auth';
 
 export async function POST(req: NextRequest, { params }: { params: Promise<{ code: string }> }) {
@@ -11,6 +11,7 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ cod
   const qr = await getQRCode(code);
   if (!qr) return NextResponse.json({ error: 'Not found' }, { status: 404 });
 
+  const sql = db();
   // Delete content and reset status to pending
   await sql`DELETE FROM content WHERE qr_code_id = ${qr.id}`;
   await sql`DELETE FROM verifications WHERE qr_code_id = ${qr.id}`;

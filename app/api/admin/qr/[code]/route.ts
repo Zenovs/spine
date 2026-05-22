@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import sql, { getQRCode } from '@/lib/db';
+import db, { getQRCode } from '@/lib/db';
 import { getAdminFromRequest } from '@/lib/auth';
 import { generateQRCodeSVG } from '@/lib/qrcode';
 
@@ -32,6 +32,7 @@ export async function DELETE(req: NextRequest, { params }: { params: Promise<{ c
   }
 
   const { code } = await params;
+  const sql = db();
   await sql`
     UPDATE qr_codes SET deleted_at = NOW(), status = 'deleted' WHERE code = ${code}
   `;

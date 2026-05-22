@@ -1,10 +1,13 @@
 import { neon } from '@neondatabase/serverless';
 
-const sql = neon(process.env.DATABASE_URL!);
+function db() {
+  return neon(process.env.DATABASE_URL!);
+}
 
-export default sql;
+export default db;
 
 export async function initDB() {
+  const sql = db();
   await sql`
     CREATE TABLE IF NOT EXISTS qr_codes (
       id          UUID PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -45,6 +48,7 @@ export async function initDB() {
 }
 
 export async function getQRCode(code: string) {
+  const sql = db();
   const rows = await sql`
     SELECT * FROM qr_codes WHERE code = ${code} AND deleted_at IS NULL LIMIT 1
   `;
@@ -52,6 +56,7 @@ export async function getQRCode(code: string) {
 }
 
 export async function getContent(qrCodeId: string) {
+  const sql = db();
   const rows = await sql`
     SELECT * FROM content WHERE qr_code_id = ${qrCodeId} LIMIT 1
   `;
@@ -59,6 +64,7 @@ export async function getContent(qrCodeId: string) {
 }
 
 export async function getAllQRCodes() {
+  const sql = db();
   return sql`
     SELECT
       q.*,

@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import sql from '@/lib/db';
+import db from '@/lib/db';
 import { getAdminFromRequest } from '@/lib/auth';
 import { generateCode } from '@/lib/qrcode';
 
@@ -10,6 +10,7 @@ export async function POST(req: NextRequest) {
 
   const { count = 1, note } = await req.json();
   const n = Math.min(Math.max(1, Number(count)), 50);
+  const sql = db();
 
   const codes: string[] = [];
   for (let i = 0; i < n; i++) {

@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import sql, { getQRCode } from '@/lib/db';
+import db, { getQRCode } from '@/lib/db';
 
 export async function POST(req: NextRequest) {
   try {
@@ -17,6 +17,7 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Dieser QR-Code ist bereits gesperrt' }, { status: 409 });
     }
 
+    const sql = db();
     const rows = await sql`
       SELECT * FROM verifications
       WHERE qr_code_id = ${qr.id}

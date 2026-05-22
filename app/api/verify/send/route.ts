@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import sql, { getQRCode } from '@/lib/db';
+import db, { getQRCode } from '@/lib/db';
 import { sendVerificationEmail } from '@/lib/email';
 
 function randomCode() {
@@ -22,6 +22,7 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Dieser QR-Code ist bereits gesperrt' }, { status: 409 });
     }
 
+    const sql = db();
     // Expire old codes for this qr+email
     await sql`
       UPDATE verifications
