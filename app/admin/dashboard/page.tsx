@@ -153,7 +153,7 @@ export default function AdminDashboard() {
           </div>
 
           {/* Stats */}
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 16, marginBottom: 40 }}>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 12, marginBottom: 32 }}>
             {[
               { label: 'Codes total', value: stats.total, badge: '' },
               { label: 'Ausstehend', value: stats.pending, badge: 'badge-pending' },
@@ -229,56 +229,62 @@ export default function AdminDashboard() {
                 <p className="lede" style={{ textAlign: 'center' }}>Noch keine QR-Codes erstellt.</p>
               </div>
             ) : (
-              <div style={{ overflowX: 'auto' }}>
-                <table className="admin-table">
-                  <thead>
-                    <tr>
-                      <th>Code</th>
-                      <th>Status</th>
-                      <th>Notiz</th>
-                      <th>Absender</th>
-                      <th>E-Mail</th>
-                      <th>Erstellt</th>
-                      <th style={{ textAlign: 'right' }}>Aktionen</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {filteredCodes.map(qr => (
-                      <tr key={qr.id}>
-                        <td>
-                          <a
-                            href={`${baseUrl}/q/${qr.code}`}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            style={{ fontFamily: 'var(--sans)', fontWeight: 600, letterSpacing: '0.08em', color: 'var(--ink)', fontSize: 13 }}
-                          >
-                            {qr.code}
-                          </a>
-                        </td>
-                        <td><span className={`badge badge-${qr.status}`}>{qr.status}</span></td>
-                        <td style={{ fontSize: 13, maxWidth: 180, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                          {qr.admin_note || <span style={{ opacity: 0.4 }}>—</span>}
-                        </td>
-                        <td style={{ fontSize: 13 }}>{qr.sender_name || <span style={{ opacity: 0.4 }}>—</span>}</td>
-                        <td style={{ fontSize: 12, color: 'var(--ink-muted)' }}>{qr.email || <span style={{ opacity: 0.4 }}>—</span>}</td>
-                        <td style={{ fontSize: 12, color: 'var(--ink-muted)', whiteSpace: 'nowrap' }}>
-                          {new Date(qr.created_at).toLocaleDateString('de-CH')}
-                        </td>
-                        <td>
-                          <div style={{ display: 'flex', gap: 8, justifyContent: 'flex-end', flexWrap: 'wrap' }}>
+              <>
+                {/* Desktop table */}
+                <div style={{ overflowX: 'auto', display: 'none' }} className="admin-table-wrap">
+                  <table className="admin-table">
+                    <thead>
+                      <tr>
+                        <th>Code</th><th>Status</th><th>Notiz</th><th>Absender</th><th>E-Mail</th><th>Erstellt</th><th style={{ textAlign: 'right' }}>Aktionen</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {filteredCodes.map(qr => (
+                        <tr key={qr.id}>
+                          <td><a href={`${baseUrl}/q/${qr.code}`} target="_blank" rel="noopener noreferrer" style={{ fontFamily: 'var(--sans)', fontWeight: 600, letterSpacing: '0.08em', color: 'var(--ink)', fontSize: 13 }}>{qr.code}</a></td>
+                          <td><span className={`badge badge-${qr.status}`}>{qr.status}</span></td>
+                          <td style={{ fontSize: 13, maxWidth: 160, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{qr.admin_note || <span style={{ opacity: 0.4 }}>—</span>}</td>
+                          <td style={{ fontSize: 13 }}>{qr.sender_name || <span style={{ opacity: 0.4 }}>—</span>}</td>
+                          <td style={{ fontSize: 12, color: 'var(--ink-muted)' }}>{qr.email || <span style={{ opacity: 0.4 }}>—</span>}</td>
+                          <td style={{ fontSize: 12, color: 'var(--ink-muted)', whiteSpace: 'nowrap' }}>{new Date(qr.created_at).toLocaleDateString('de-CH')}</td>
+                          <td><div style={{ display: 'flex', gap: 6, justifyContent: 'flex-end' }}>
                             <button className="btn btn-ghost btn-sm" onClick={() => downloadQR(qr.code)}>SVG</button>
                             <Link href={`/q/${qr.code}/view`} className="btn btn-ghost btn-sm" target="_blank">Ansicht</Link>
-                            {qr.status === 'locked' && (
-                              <button className="btn btn-ghost btn-sm" onClick={() => resetQR(qr.code)}>Reset</button>
-                            )}
+                            {qr.status === 'locked' && <button className="btn btn-ghost btn-sm" onClick={() => resetQR(qr.code)}>Reset</button>}
                             <button className="btn btn-danger btn-sm" onClick={() => deleteQR(qr.code)}>Löschen</button>
-                          </div>
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
+                          </div></td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+                {/* Mobile cards */}
+                <div style={{ display: 'flex', flexDirection: 'column' }}>
+                  {filteredCodes.map(qr => (
+                    <div key={qr.id} style={{ padding: '16px 20px', borderBottom: '1px solid var(--rule)' }}>
+                      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12, marginBottom: 8 }}>
+                        <a href={`${baseUrl}/q/${qr.code}`} target="_blank" rel="noopener noreferrer"
+                          style={{ fontFamily: 'var(--sans)', fontWeight: 600, fontSize: 14, letterSpacing: '0.08em', color: 'var(--ink)' }}>
+                          {qr.code}
+                        </a>
+                        <span className={`badge badge-${qr.status}`}>{qr.status}</span>
+                      </div>
+                      {(qr.admin_note || qr.sender_name || qr.email) && (
+                        <div style={{ fontFamily: 'var(--sans)', fontSize: 12, color: 'var(--ink-muted)', marginBottom: 10, lineHeight: 1.5 }}>
+                          {qr.admin_note && <div>{qr.admin_note}</div>}
+                          {qr.sender_name && <div>{qr.sender_name} · {qr.email}</div>}
+                        </div>
+                      )}
+                      <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+                        <button className="btn btn-ghost btn-sm" onClick={() => downloadQR(qr.code)}>SVG</button>
+                        <Link href={`/q/${qr.code}/view`} className="btn btn-ghost btn-sm" target="_blank">Ansicht</Link>
+                        {qr.status === 'locked' && <button className="btn btn-ghost btn-sm" onClick={() => resetQR(qr.code)}>Reset</button>}
+                        <button className="btn btn-danger btn-sm" onClick={() => deleteQR(qr.code)}>Löschen</button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </>
             )}
           </div>
         </div>

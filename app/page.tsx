@@ -26,7 +26,7 @@ export default function Home() {
             <h2 className="section-title" style={{ textAlign: 'center', marginBottom: 56 }}>
               Drei Schritte, eine <em>Erinnerung.</em>
             </h2>
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 'clamp(20px,3vw,48px)' }}>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: 'clamp(16px,3vw,40px)' }}>
               {[
                 { num: '01', title: 'QR-Code scannen', body: 'Der QR-Code ist bereits auf der Flasche. Scanne ihn — beim ersten Mal gelangst du zur Eingabe deiner persönlichen Botschaft.' },
                 { num: '02', title: 'Botschaft hinterlegen', body: 'Verifiziere deine E-Mail, lade ein Video hoch, schreibe deine Grussworte und wähle ein Bild — einmalig und für immer gespeichert.' },

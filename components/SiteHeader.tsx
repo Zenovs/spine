@@ -58,8 +58,19 @@ export function SiteFooter() {
         <div style={{ fontFamily: 'var(--serif)', fontSize: 15, color: '#C2AC85', letterSpacing: '0.1em' }}>
           Weinbotschaft
         </div>
-        <div style={{ fontFamily: 'var(--sans)', fontSize: 11, letterSpacing: '0.08em', color: '#8C7D5E' }}>
-          © {new Date().getFullYear()} · Persönliche QR-Erlebnisse für besondere Flaschen
+        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: 4 }}>
+          <div style={{ fontFamily: 'var(--sans)', fontSize: 11, letterSpacing: '0.08em', color: '#8C7D5E' }}>
+            © {new Date().getFullYear()} · Persönliche QR-Erlebnisse für besondere Flaschen
+          </div>
+          <div style={{ fontFamily: 'var(--sans)', fontSize: 10, letterSpacing: '0.08em', color: '#5C5040' }}>
+            powered by{' '}
+            <a href="https://wireon.ch" target="_blank" rel="noopener noreferrer"
+              style={{ color: '#7A6A50', textDecoration: 'none', borderBottom: '1px solid #4A3E2E' }}
+              onMouseEnter={e => (e.currentTarget.style.color = '#C2AC85')}
+              onMouseLeave={e => (e.currentTarget.style.color = '#7A6A50')}>
+              wireon
+            </a>
+          </div>
         </div>
       </div>
     </footer>

@@ -44,8 +44,8 @@ export default async function ViewPage({ params }: { params: Promise<{ code: str
         {isLocked ? 'Dieser Inhalt ist dauerhaft gespeichert und kann nicht mehr geändert werden.' : 'Standard-Inhalt · Noch keine persönliche Botschaft hinterlegt.'}
       </div>
 
-      <main style={{ flex: 1, padding: 'clamp(32px,5vw,64px) 20px' }}>
-        <div style={{ maxWidth: 680, margin: '0 auto' }}>
+      <main style={{ flex: 1, padding: 'clamp(20px,4vw,56px) 16px' }}>
+        <div style={{ maxWidth: 640, margin: '0 auto' }}>
 
           {/* Header */}
           <div style={{ textAlign: 'center', marginBottom: 40 }}>
