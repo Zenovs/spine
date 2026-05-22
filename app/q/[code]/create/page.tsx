@@ -86,16 +86,18 @@ export default function CreatePage() {
             access: 'public',
             handleUploadUrl: '/api/upload',
             onUploadProgress: ({ percentage }) => {
-              setUploadPercent(Math.round(percentage));
+              // Cap at 95 — server still commits after the HTTP transfer ends
+              setUploadPercent(Math.min(Math.round(percentage), 95));
               const elapsed = (Date.now() - uploadStartRef.current) / 1000;
               if (percentage > 2 && elapsed > 0.5) {
                 const total = elapsed / (percentage / 100);
-                setUploadETA(formatETA(total - elapsed));
+                setUploadETA(formatETA(Math.max(0, total - elapsed)));
               }
             },
           }
         );
         videoUrl = blob.url;
+        setUploadPercent(100);
         setUploadETA('');
       }
 
@@ -111,11 +113,12 @@ export default function CreatePage() {
             access: 'public',
             handleUploadUrl: '/api/upload',
             onUploadProgress: ({ percentage }) => {
-              setUploadPercent(Math.round(percentage));
+              setUploadPercent(Math.min(Math.round(percentage), 95));
             },
           }
         );
         imageUrl = blob.url;
+        setUploadPercent(100);
       } else if (imageSource === 'template' && selectedTemplate) {
         imageUrl = IMAGE_TEMPLATES.find(t => t.id === selectedTemplate)?.url || '';
       }
