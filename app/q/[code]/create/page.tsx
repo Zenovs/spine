@@ -3,6 +3,7 @@ import { useState, useRef } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { upload } from '@vercel/blob/client';
 import { SiteHeader, SiteFooter } from '@/components/SiteHeader';
+import { compressVideo } from '@/lib/compress-video';
 
 function formatETA(seconds: number) {
   if (seconds < 5) return 'wenige Sekunden';
@@ -74,14 +75,21 @@ export default function CreatePage() {
       let imageUrl = '';
 
       if (videoFile) {
+        // Compress if > 20 MB — shows its own stage/progress feedback
+        const toUpload = await compressVideo(
+          videoFile,
+          (stage) => { setUploadProgress(stage); setUploadPercent(0); setUploadETA(''); },
+          (pct) => setUploadPercent(pct),
+        );
+
         setUploadProgress('Video wird hochgeladen…');
         setUploadPercent(0);
         setUploadETA('');
         uploadStartRef.current = Date.now();
-        const ext = videoFile.name.split('.').pop() || 'mp4';
+        const ext = toUpload.name.split('.').pop() || 'mp4';
         const blob = await upload(
           `videos/${Date.now()}.${ext}`,
-          videoFile,
+          toUpload,
           {
             access: 'public',
             handleUploadUrl: '/api/upload',
