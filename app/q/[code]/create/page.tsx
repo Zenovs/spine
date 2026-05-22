@@ -333,22 +333,22 @@ export default function CreatePage() {
                   <div style={{ marginBottom: 16 }}>
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
                       <span style={{ fontFamily: 'var(--sans)', fontSize: 12, color: 'var(--ink-muted)', letterSpacing: '0.06em' }}>
-                        {uploadProgress}
+                        {uploadPercent >= 95 && uploadPercent < 100 ? 'Wird abgeschlossen…' : uploadProgress}
                       </span>
-                      {uploadPercent > 0 && (
+                      {uploadPercent > 0 && uploadPercent < 95 && (
                         <span style={{ fontFamily: 'var(--sans)', fontSize: 13, fontWeight: 600, color: 'var(--ink)' }}>
                           {uploadPercent} %
                         </span>
                       )}
                     </div>
                     <div className="progress-bar-wrap">
-                      {uploadPercent > 0 ? (
-                        <div className="progress-bar-fill" style={{ width: `${uploadPercent}%` }} />
-                      ) : (
+                      {uploadPercent === 0 || (uploadPercent >= 95 && uploadPercent < 100) ? (
                         <div className="progress-bar-indeterminate" style={{ width: '40%' }} />
+                      ) : (
+                        <div className="progress-bar-fill" style={{ width: `${uploadPercent}%` }} />
                       )}
                     </div>
-                    {uploadETA && (
+                    {uploadETA && uploadPercent < 95 && (
                       <div style={{ textAlign: 'right', fontFamily: 'var(--sans)', fontSize: 11, color: 'var(--ink-muted)', marginTop: 5 }}>
                         noch ca. {uploadETA}
                       </div>
