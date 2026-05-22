@@ -32,11 +32,17 @@ export default function AdminDashboard() {
   };
 
   const loadQRCodes = useCallback(async () => {
-    const res = await fetch('/api/admin/qr/list');
-    if (res.status === 401) { router.push('/admin'); return; }
-    const data = await res.json();
-    setQrCodes(data.codes || []);
-    setLoading(false);
+    try {
+      const res = await fetch('/api/admin/qr/list');
+      if (res.status === 401) { router.push('/admin'); return; }
+      const text = await res.text();
+      const data = text ? JSON.parse(text) : {};
+      setQrCodes(data.codes || []);
+    } catch {
+      // ignore load errors silently
+    } finally {
+      setLoading(false);
+    }
   }, [router]);
 
   useEffect(() => {
@@ -53,13 +59,22 @@ export default function AdminDashboard() {
         body: JSON.stringify({ count, note }),
       });
       if (res.status === 401) { router.push('/admin'); return; }
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error || 'Fehler');
+      const text = await res.text();
+      const data = text ? JSON.parse(text) : {};
+      if (!res.ok) {
+        // 503 means DB was just initialized — retry once automatically
+        if (res.status === 503) {
+          await new Promise(r => setTimeout(r, 800));
+          setCreating(false);
+          return createQRCodes();
+        }
+        throw new Error(data.error || `Fehler (${res.status})`);
+      }
       showToast(`${data.codes.length} QR-Code(s) erstellt`);
       setNote('');
       loadQRCodes();
     } catch (e: unknown) {
-      showToast(e instanceof Error ? e.message : 'Fehler');
+      showToast(e instanceof Error ? e.message : 'Fehler beim Erstellen');
     } finally {
       setCreating(false);
     }
