@@ -28,9 +28,9 @@ export default function Home() {
             </h2>
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 'clamp(20px,3vw,48px)' }}>
               {[
-                { num: '01', title: 'QR-Code erhalten', body: 'Bestelle einen individuellen QR-Code für deine Flasche. Jeder Code ist einmalig und unveränderbar nach dem Speichern.' },
-                { num: '02', title: 'Botschaft hinterlegen', body: 'Verifiziere deine E-Mail, dann lade dein Video hoch, schreibe deine Grussworte und wähle ein Bild — einmalig, permanent.' },
-                { num: '03', title: 'Erlebnis teilen', body: 'Klebe den QR-Code auf die Flasche. Der Empfänger scannt ihn und erlebt deine persönliche Botschaft direkt auf dem Smartphone.' },
+                { num: '01', title: 'QR-Code scannen', body: 'Der QR-Code ist bereits auf der Flasche. Scanne ihn — beim ersten Mal gelangst du zur Eingabe deiner persönlichen Botschaft.' },
+                { num: '02', title: 'Botschaft hinterlegen', body: 'Verifiziere deine E-Mail, lade ein Video hoch, schreibe deine Grussworte und wähle ein Bild — einmalig und für immer gespeichert.' },
+                { num: '03', title: 'Erlebnis empfangen', body: 'Jeder weitere Scan zeigt direkt die hinterlegte Botschaft — Video, Text und Bild. Unveränderlich, für immer mit der Flasche verbunden.' },
               ].map((step, i) => (
                 <div key={i} style={{ background: 'var(--bg-paper)', border: '1px solid var(--rule)', padding: 'clamp(28px,3vw,40px)', position: 'relative' }}>
                   <div style={{ fontFamily: 'var(--serif)', fontStyle: 'italic', fontSize: 16, color: 'var(--ink-muted)', marginBottom: 20 }}>{step.num}</div>
@@ -50,7 +50,8 @@ export default function Home() {
               Hinterlasse etwas <em>Bleibendes.</em>
             </h2>
             <p className="lede" style={{ textAlign: 'center', marginBottom: 36 }}>
-              QR-Codes werden über die Admin-Konsole erstellt und können an beliebige Flaschen angebracht werden.
+              Der QR-Code ist bereits auf der Flasche. Scanne ihn und hinterlasse deine Botschaft —
+              beim nächsten Scan sieht der Empfänger genau das, was du hinterlegt hast.
             </p>
           </div>
         </section>
