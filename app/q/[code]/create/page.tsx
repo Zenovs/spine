@@ -85,6 +85,7 @@ export default function CreatePage() {
           {
             access: 'public',
             handleUploadUrl: '/api/upload',
+            multipart: true,
             onUploadProgress: ({ percentage }) => {
               // Cap at 95 — server still commits after the HTTP transfer ends
               setUploadPercent(Math.min(Math.round(percentage), 95));

@@ -13,8 +13,8 @@ export default function Home() {
               Jede Flasche erzählt <em>deine Geschichte</em>.
             </h1>
             <p className="lede" style={{ textAlign: 'center', maxWidth: 600, margin: '0 auto 40px' }}>
-              Klebe einen individuellen QR-Code auf eine Weinflasche. Der Empfänger scannt den Code
-              und empfängt deine persönliche Videobotschaft, Grussworte und ein Bild — für immer hinterlegt.
+              Der QR-Code ist bereits auf der Flasche. Scanne ihn und hinterlege deine persönliche
+              Videobotschaft, Grussworte und ein Bild — einmalig und für immer gespeichert.
             </p>
           </div>
         </section>

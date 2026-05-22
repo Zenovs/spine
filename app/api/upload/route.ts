@@ -18,7 +18,6 @@ export async function POST(req: NextRequest) {
         maximumSizeInBytes: 200 * 1024 * 1024,
         tokenPayload: pathname,
       }),
-      onUploadCompleted: async () => {},
     });
     return NextResponse.json(res);
   } catch (e: unknown) {
