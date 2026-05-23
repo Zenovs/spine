@@ -30,9 +30,16 @@ export async function initDB() {
       video_url   TEXT,
       image_url   TEXT,
       sender_name VARCHAR(255),
+      video_fit   VARCHAR(10) DEFAULT 'contain',
+      video_obj_x INTEGER     DEFAULT 50,
+      video_obj_y INTEGER     DEFAULT 50,
       created_at  TIMESTAMPTZ DEFAULT NOW()
     )
   `;
+  // Migrate existing content rows (idempotent)
+  await sql`ALTER TABLE content ADD COLUMN IF NOT EXISTS video_fit   VARCHAR(10) DEFAULT 'contain'`;
+  await sql`ALTER TABLE content ADD COLUMN IF NOT EXISTS video_obj_x INTEGER     DEFAULT 50`;
+  await sql`ALTER TABLE content ADD COLUMN IF NOT EXISTS video_obj_y INTEGER     DEFAULT 50`;
 
   await sql`
     CREATE TABLE IF NOT EXISTS verifications (

@@ -354,7 +354,12 @@ export default function CreatePage() {
       const res = await fetch('/api/content/save', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ code, senderName, message, videoUrl, imageUrl }),
+        body: JSON.stringify({
+          code, senderName, message, videoUrl, imageUrl,
+          videoFit,
+          videoObjX: videoObjPos.x,
+          videoObjY: videoObjPos.y,
+        }),
       });
       const data = await res.json();
       ulog('save content response', { ok: res.ok, status: res.status, data });
@@ -562,16 +567,37 @@ export default function CreatePage() {
               </div>
             )}
 
-            {/* ── Step 3: Image + Submit ── */}
+            {/* ── Step 3: Image (optional) + Submit ── */}
             {step === 3 && (
               <div className="card">
                 <p className="eyebrow">— 3 / 3 —</p>
                 <h1 className="section-title" style={{ fontSize: 'clamp(22px,5vw,38px)', marginBottom: 8 }}>
-                  Dein <em>Bild</em>
+                  Dein <em>Bild</em> <span style={{ fontFamily: 'var(--sans)', fontStyle: 'normal', fontSize: 14, color: 'var(--ink-muted)', letterSpacing: '0.06em', textTransform: 'uppercase' }}>(optional)</span>
                 </h1>
-                <p style={{ fontFamily: 'var(--sans)', fontSize: 14, color: 'var(--ink-soft)', marginBottom: 20, lineHeight: 1.6 }}>
-                  Wähle ein Vorlagenbild oder lade ein eigenes hoch.
+                <p style={{ fontFamily: 'var(--sans)', fontSize: 14, color: 'var(--ink-soft)', marginBottom: 16, lineHeight: 1.6 }}>
+                  Wähle ein Vorlagenbild, lade ein eigenes hoch — oder lass es weg, wenn nur dein Video & deine Botschaft zu sehen sein sollen.
                 </p>
+
+                {/* "No image" toggle */}
+                <button type="button"
+                  onClick={() => { setImageSource('none'); setSelectedTemplate(''); setImageFile(null); setImagePreview(''); }}
+                  style={{
+                    display: 'flex', alignItems: 'center', gap: 10, width: '100%',
+                    background: imageSource === 'none' ? 'rgba(110,34,48,0.08)' : 'transparent',
+                    border: `1px solid ${imageSource === 'none' ? 'var(--accent)' : 'var(--rule)'}`,
+                    borderRadius: 3, padding: '12px 14px', marginBottom: 18, cursor: 'pointer', textAlign: 'left',
+                  }}>
+                  <span style={{
+                    width: 16, height: 16, borderRadius: '50%',
+                    border: `1.5px solid ${imageSource === 'none' ? 'var(--accent)' : 'var(--rule)'}`,
+                    display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0,
+                  }}>
+                    {imageSource === 'none' && <span style={{ width: 8, height: 8, borderRadius: '50%', background: 'var(--accent)' }} />}
+                  </span>
+                  <span style={{ fontFamily: 'var(--sans)', fontSize: 13, color: imageSource === 'none' ? 'var(--accent)' : 'var(--ink-soft)', letterSpacing: '0.02em' }}>
+                    Kein Bild anzeigen
+                  </span>
+                </button>
 
                 {/* Templates — 2 columns on mobile */}
                 <p className="input-label">Vorlage wählen</p>

@@ -13,6 +13,9 @@ export default async function ViewPage({ params }: { params: Promise<{ code: str
   let message = '';
   let videoUrl = '';
   let imageUrl = '';
+  let videoFit: 'contain' | 'cover' = 'contain';
+  let videoObjX = 50;
+  let videoObjY = 50;
 
   if (qr.status === 'locked') {
     content = await getContent(qr.id);
@@ -21,6 +24,9 @@ export default async function ViewPage({ params }: { params: Promise<{ code: str
       message = content.message || '';
       videoUrl = content.video_url || '';
       imageUrl = content.image_url || '';
+      videoFit = content.video_fit === 'cover' ? 'cover' : 'contain';
+      videoObjX = typeof content.video_obj_x === 'number' ? content.video_obj_x : 50;
+      videoObjY = typeof content.video_obj_y === 'number' ? content.video_obj_y : 50;
     }
   } else {
     // Show default content if set
@@ -67,7 +73,13 @@ export default async function ViewPage({ params }: { params: Promise<{ code: str
               {/* Video */}
               {videoUrl && (
                 <div className="card" style={{ padding: 0, overflow: 'hidden' }}>
-                  <VideoPlayerClient url={videoUrl} senderName={senderName} />
+                  <VideoPlayerClient
+                    url={videoUrl}
+                    senderName={senderName}
+                    fit={videoFit}
+                    objX={videoObjX}
+                    objY={videoObjY}
+                  />
                 </div>
               )}
 

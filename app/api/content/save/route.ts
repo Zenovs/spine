@@ -4,7 +4,7 @@ import { cookies } from 'next/headers';
 
 export async function POST(req: NextRequest) {
   try {
-    const { code, senderName, message, videoUrl, imageUrl } = await req.json();
+    const { code, senderName, message, videoUrl, imageUrl, videoFit, videoObjX, videoObjY } = await req.json();
 
     if (!code) {
       return NextResponse.json({ error: 'Code erforderlich' }, { status: 400 });
@@ -28,11 +28,16 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Dieser QR-Code ist bereits gesperrt' }, { status: 409 });
     }
 
+    // Sanitize video positioning
+    const fit = videoFit === 'cover' ? 'cover' : 'contain';
+    const objX = Math.max(0, Math.min(100, Math.round(Number(videoObjX) || 50)));
+    const objY = Math.max(0, Math.min(100, Math.round(Number(videoObjY) || 50)));
+
     const sql = db();
     // Save content
     await sql`
-      INSERT INTO content (qr_code_id, email, sender_name, message, video_url, image_url)
-      VALUES (${qr.id}, ${verifiedEmail}, ${senderName || null}, ${message}, ${videoUrl || null}, ${imageUrl || null})
+      INSERT INTO content (qr_code_id, email, sender_name, message, video_url, image_url, video_fit, video_obj_x, video_obj_y)
+      VALUES (${qr.id}, ${verifiedEmail}, ${senderName || null}, ${message}, ${videoUrl || null}, ${imageUrl || null}, ${fit}, ${objX}, ${objY})
     `;
 
     // Lock the QR code

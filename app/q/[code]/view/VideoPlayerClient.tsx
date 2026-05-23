@@ -1,7 +1,15 @@
 'use client';
 import { useState, useRef } from 'react';
 
-export function VideoPlayerClient({ url, senderName }: { url: string; senderName: string }) {
+type Props = {
+  url: string;
+  senderName: string;
+  fit?: 'contain' | 'cover';
+  objX?: number;
+  objY?: number;
+};
+
+export function VideoPlayerClient({ url, senderName, fit = 'contain', objX = 50, objY = 50 }: Props) {
   const videoRef = useRef<HTMLVideoElement>(null);
   const [playing, setPlaying] = useState(false);
 
@@ -15,7 +23,11 @@ export function VideoPlayerClient({ url, senderName }: { url: string; senderName
       <video
         ref={videoRef}
         src={url}
-        style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'contain' }}
+        style={{
+          position: 'absolute', inset: 0, width: '100%', height: '100%',
+          objectFit: fit,
+          objectPosition: `${objX}% ${objY}%`,
+        }}
         controls={playing}
         playsInline
         onEnded={() => setPlaying(false)}
