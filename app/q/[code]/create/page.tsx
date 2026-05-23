@@ -20,29 +20,38 @@ function ulog(...args: unknown[]) {
 
 // Wraps @vercel/blob/client upload() with three safeguards against the
 // SDK's silent retry-loop on flaky mobile networks:
-//   1. multipart=true — chunks are short, network drops only kill one chunk
+//   1. multipart=true — chunks are short, a network drop only kills one chunk
 //      (single PUT retries reset progress to 0 → user sees endless oscillation)
 //   2. max-progress stall: aborts if the highest % reached doesn't advance
 //      for STALL_MS (catches retry loops that keep producing progress events)
-//   3. total timeout: hard cap on the entire upload (catches everything else)
+//   3. total timeout: hard cap on the entire upload
+//   4. external abort: user can cancel via the Cancel button
 async function uploadWithStallGuard(
   pathname: string,
   file: File,
   useMultipart: boolean,
-  onProgress: (e: { percentage: number }) => void,
+  externalSignal: AbortSignal,
+  onProgress: (e: { percentage: number; retries: number }) => void,
 ) {
-  const STALL_MS = 90_000;      // 90s without max-progress increase → abort
+  const STALL_MS = 45_000;      // 45s without max-progress advance → abort
   const TOTAL_MS = 5 * 60_000;  // 5min hard cap
   const controller = new AbortController();
+  if (externalSignal.aborted) controller.abort();
+  const propagateAbort = () => controller.abort();
+  externalSignal.addEventListener('abort', propagateAbort);
   const startedAt = Date.now();
   let maxPct = 0;
   let maxAt = Date.now();
   let lastPct = 0;
   let retryDips = 0;
+  let userCancelled = false;
 
   const watchdog = setInterval(() => {
     const now = Date.now();
-    if (now - startedAt > TOTAL_MS) {
+    if (externalSignal.aborted) {
+      userCancelled = true;
+      clearInterval(watchdog);
+    } else if (now - startedAt > TOTAL_MS) {
       ulog('upload TOTAL TIMEOUT — aborting', { maxPct, retryDips });
       controller.abort();
       clearInterval(watchdog);
@@ -51,7 +60,7 @@ async function uploadWithStallGuard(
       controller.abort();
       clearInterval(watchdog);
     }
-  }, 5_000);
+  }, 3_000);
 
   try {
     return await upload(pathname, file, {
@@ -68,10 +77,13 @@ async function uploadWithStallGuard(
           ulog('upload retry detected (progress fiel zurück)', { from: lastPct.toFixed(1), to: e.percentage.toFixed(1), retryDips });
         }
         lastPct = e.percentage;
-        onProgress(e);
+        onProgress({ percentage: e.percentage, retries: retryDips });
       },
     });
   } catch (err) {
+    if (userCancelled || externalSignal.aborted) {
+      throw new Error('Upload abgebrochen');
+    }
     if (controller.signal.aborted) {
       const reason = Date.now() - startedAt > TOTAL_MS
         ? `Upload-Timeout nach 5 Min`
@@ -80,6 +92,7 @@ async function uploadWithStallGuard(
     }
     throw err;
   } finally {
+    externalSignal.removeEventListener('abort', propagateAbort);
     clearInterval(watchdog);
   }
 }
@@ -94,6 +107,7 @@ const IMAGE_TEMPLATES = [
 ];
 
 type ImageSource = 'none' | 'template' | 'upload';
+type CompState = 'idle' | 'preparing' | 'compressing' | 'ready' | 'failed';
 
 export default function CreatePage() {
   const { code } = useParams<{ code: string }>();
@@ -111,8 +125,14 @@ export default function CreatePage() {
   const [uploadProgress, setUploadProgress] = useState('');
   const [uploadPercent, setUploadPercent] = useState(0);
   const [uploadETA, setUploadETA] = useState('');
+  const [uploadRetries, setUploadRetries] = useState(0);
   const [error, setError] = useState('');
   const [step, setStep] = useState<1 | 2 | 3>(1);
+
+  // Compression-on-selection state
+  const [compState, setCompState] = useState<CompState>('idle');
+  const [compStage, setCompStage] = useState('');
+  const [compPct, setCompPct] = useState(0);
 
   const [videoFit, setVideoFit] = useState<'contain' | 'cover'>('contain');
   const [videoObjPos, setVideoObjPos] = useState({ x: 50, y: 50 });
@@ -121,14 +141,66 @@ export default function CreatePage() {
   const videoInputRef = useRef<HTMLInputElement>(null);
   const imageInputRef = useRef<HTMLInputElement>(null);
   const uploadStartRef = useRef<number>(0);
+  const compIdRef = useRef(0);
+  const compPromiseRef = useRef<Promise<File> | null>(null);
+  const uploadAbortRef = useRef<AbortController | null>(null);
 
   function handleVideoChange(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
     if (!file) return;
     if (file.size > 200 * 1024 * 1024) { setError('Video max. 200 MB'); return; }
+    setError('');
     setVideoFile(file);
     setVideoPreview(URL.createObjectURL(file));
-    setError('');
+    startCompression(file);
+  }
+
+  function resetVideo() {
+    compIdRef.current++; // invalidate any in-flight compression
+    compPromiseRef.current = null;
+    setVideoFile(null);
+    setVideoPreview('');
+    setVideoFit('contain');
+    setVideoObjPos({ x: 50, y: 50 });
+    setCompState('idle');
+    setCompStage('');
+    setCompPct(0);
+  }
+
+  function startCompression(file: File) {
+    const myId = ++compIdRef.current;
+    setCompState('preparing');
+    setCompStage('Wird vorbereitet…');
+    setCompPct(0);
+
+    compPromiseRef.current = (async () => {
+      try {
+        const result = await compressVideo(
+          file,
+          (stage) => {
+            if (myId !== compIdRef.current) return;
+            ulog('precompress stage:', stage);
+            setCompStage(stage);
+            setCompState(stage.toLowerCase().includes('komprim') ? 'compressing' : 'preparing');
+          },
+          (pct) => { if (myId === compIdRef.current) setCompPct(pct); },
+        );
+        if (myId !== compIdRef.current) throw new Error('cancelled');
+        setCompPct(100);
+        setCompState('ready');
+        setCompStage(result.didCompress
+          ? `✓ Komprimiert: ${result.originalMB.toFixed(0)} MB → ${result.compressedMB.toFixed(0)} MB`
+          : `✓ Bereit zum Hochladen · ${result.originalMB.toFixed(0)} MB`);
+        ulog('precompress done', { didCompress: result.didCompress, originalMB: result.originalMB.toFixed(2), compressedMB: result.compressedMB.toFixed(2) });
+        return result.file;
+      } catch (err) {
+        if (myId !== compIdRef.current) throw err;
+        ulog('precompress failed — original wird verwendet:', err);
+        setCompState('failed');
+        setCompStage(`Komprimierung fehlgeschlagen · Original ${(file.size / 1e6).toFixed(0)} MB wird hochgeladen`);
+        return file;
+      }
+    })();
   }
 
   function handleImageChange(e: React.ChangeEvent<HTMLInputElement>) {
@@ -142,53 +214,51 @@ export default function CreatePage() {
     setError('');
   }
 
+  function cancelUpload() {
+    ulog('user cancelled upload');
+    uploadAbortRef.current?.abort();
+  }
+
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setLoading(true);
     setError('');
-    ulog('submit start', { hasVideo: !!videoFile, hasImage: !!imageFile, imageSource });
+    setUploadRetries(0);
+    uploadAbortRef.current = new AbortController();
+    ulog('submit start', { hasVideo: !!videoFile, hasImage: !!imageFile, imageSource, compState });
 
     try {
       let videoUrl = '';
       let imageUrl = '';
 
       if (videoFile) {
-        ulog('video file', { name: videoFile.name, type: videoFile.type, sizeMB: (videoFile.size / 1e6).toFixed(2) });
-        let toUpload = videoFile;
-        try {
-          const result = await compressVideo(
-            videoFile,
-            (stage) => { ulog('compress stage:', stage); setUploadProgress(stage); setUploadPercent(0); setUploadETA(''); },
-            (pct) => setUploadPercent(pct),
-          );
-          toUpload = result.file;
-          ulog('compress done', { didCompress: result.didCompress, originalMB: result.originalMB.toFixed(2), compressedMB: result.compressedMB.toFixed(2) });
-          if (result.didCompress) {
-            setUploadProgress(
-              `Komprimiert: ${result.originalMB.toFixed(0)} MB → ${result.compressedMB.toFixed(0)} MB · Hochladen…`,
-            );
-          } else {
-            setUploadProgress('Video wird hochgeladen…');
+        // Compression has been running since the user selected the video. Just wait for it.
+        let toUpload: File;
+        if (compPromiseRef.current) {
+          if (compState !== 'ready' && compState !== 'failed') {
+            setUploadProgress('Komprimierung wird abgeschlossen…');
+            setUploadPercent(0);
           }
-        } catch (compErr) {
-          ulog('compression error — falling back to original:', compErr);
-          setUploadProgress('Komprimierung fehlgeschlagen · lade Original hoch…');
+          toUpload = await compPromiseRef.current;
+        } else {
+          toUpload = videoFile;
         }
 
-        if (toUpload.size === 0) {
-          throw new Error('Video-Datei ist leer (0 Byte) — bitte erneut auswählen');
-        }
+        if (uploadAbortRef.current.signal.aborted) throw new Error('Abgebrochen');
+        if (toUpload.size === 0) throw new Error('Video-Datei ist leer (0 Byte) — bitte erneut auswählen');
 
-        setUploadProgress(prev => prev || 'Video wird hochgeladen…');
+        const mb = (toUpload.size / 1e6).toFixed(0);
+        setUploadProgress(`Video wird hochgeladen · ${mb} MB`);
         setUploadPercent(0);
         setUploadETA('');
         uploadStartRef.current = Date.now();
         const ext = toUpload.name.split('.').pop() || 'mp4';
         const pathname = `videos/${Date.now()}.${ext}`;
-        ulog('blob upload start', { pathname, sizeMB: (toUpload.size / 1e6).toFixed(2), type: toUpload.type });
+        ulog('blob upload start', { pathname, sizeMB: mb, type: toUpload.type });
 
-        const blob = await uploadWithStallGuard(pathname, toUpload, true, ({ percentage }) => {
+        const blob = await uploadWithStallGuard(pathname, toUpload, true, uploadAbortRef.current.signal, ({ percentage, retries }) => {
           setUploadPercent(Math.min(Math.round(percentage), 95));
+          setUploadRetries(retries);
           const elapsed = (Date.now() - uploadStartRef.current) / 1000;
           if (percentage > 2 && elapsed > 0.5) {
             const total = elapsed / (percentage / 100);
@@ -202,14 +272,17 @@ export default function CreatePage() {
       }
 
       if (imageSource === 'upload' && imageFile) {
+        if (uploadAbortRef.current.signal.aborted) throw new Error('Abgebrochen');
         ulog('image upload start', { name: imageFile.name, sizeMB: (imageFile.size / 1e6).toFixed(2) });
         setUploadProgress('Bild wird hochgeladen…');
         setUploadPercent(0);
+        setUploadRetries(0);
         uploadStartRef.current = Date.now();
         const ext = imageFile.name.split('.').pop() || 'jpg';
         const pathname = `images/${Date.now()}.${ext}`;
-        const blob = await uploadWithStallGuard(pathname, imageFile, false, ({ percentage }) => {
+        const blob = await uploadWithStallGuard(pathname, imageFile, false, uploadAbortRef.current.signal, ({ percentage, retries }) => {
           setUploadPercent(Math.min(Math.round(percentage), 95));
+          setUploadRetries(retries);
         });
         ulog('image upload done', { url: blob.url });
         imageUrl = blob.url;
@@ -218,6 +291,7 @@ export default function CreatePage() {
         imageUrl = IMAGE_TEMPLATES.find(t => t.id === selectedTemplate)?.url || '';
       }
 
+      if (uploadAbortRef.current.signal.aborted) throw new Error('Abgebrochen');
       ulog('save content start');
       setUploadProgress('Botschaft wird gespeichert…');
       setUploadPercent(0);
@@ -240,6 +314,8 @@ export default function CreatePage() {
       setUploadProgress('');
       setUploadPercent(0);
       setUploadETA('');
+      setUploadRetries(0);
+      uploadAbortRef.current = null;
     }
   }
 
@@ -368,11 +444,43 @@ export default function CreatePage() {
                         style={{ background: 'none', border: '1px solid var(--rule)', borderRadius: 999, fontFamily: 'var(--sans)', fontSize: 11, letterSpacing: '0.1em', textTransform: 'uppercase', color: 'var(--ink-muted)', cursor: 'pointer', padding: '4px 12px' }}>
                         {videoFit === 'contain' ? '⊡ Ausfüllen' : '⊞ Anpassen'}
                       </button>
-                      <button type="button" onClick={() => { setVideoFile(null); setVideoPreview(''); setVideoFit('contain'); setVideoObjPos({ x: 50, y: 50 }); }}
+                      <button type="button" onClick={resetVideo}
                         style={{ background: 'none', border: 'none', fontFamily: 'var(--sans)', fontSize: 12, letterSpacing: '0.12em', textTransform: 'uppercase', color: 'var(--ink-muted)', cursor: 'pointer' }}>
                         Entfernen ×
                       </button>
                     </div>
+
+                    {/* Pre-compression status — runs in background after selection */}
+                    {(compState === 'preparing' || compState === 'compressing') && (
+                      <div style={{ marginTop: 12, padding: '10px 12px', background: 'rgba(0,0,0,0.03)', borderRadius: 3, border: '1px solid var(--rule)' }}>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 6 }}>
+                          <span style={{ fontFamily: 'var(--sans)', fontSize: 12, color: 'var(--ink-soft)' }}>{compStage}</span>
+                          {compPct > 0 && compPct < 100 && (
+                            <span style={{ fontFamily: 'var(--sans)', fontSize: 12, fontWeight: 600, color: 'var(--ink)' }}>{compPct} %</span>
+                          )}
+                        </div>
+                        <div className="progress-bar-wrap">
+                          {compPct === 0 || compState === 'preparing' ? (
+                            <div className="progress-bar-indeterminate" style={{ width: '40%' }} />
+                          ) : (
+                            <div className="progress-bar-fill" style={{ width: `${compPct}%` }} />
+                          )}
+                        </div>
+                        <p style={{ fontFamily: 'var(--sans)', fontSize: 10, color: 'var(--ink-muted)', marginTop: 6, letterSpacing: '0.04em' }}>
+                          Das Video wird im Hintergrund vorbereitet — du kannst bereits weitermachen.
+                        </p>
+                      </div>
+                    )}
+                    {compState === 'ready' && (
+                      <p style={{ fontFamily: 'var(--sans)', fontSize: 12, color: 'var(--accent)', marginTop: 10, letterSpacing: '0.04em' }}>
+                        {compStage}
+                      </p>
+                    )}
+                    {compState === 'failed' && (
+                      <p style={{ fontFamily: 'var(--sans)', fontSize: 12, color: 'var(--ink-muted)', marginTop: 10, letterSpacing: '0.04em' }}>
+                        {compStage}
+                      </p>
+                    )}
                   </div>
                 ) : (
                   <div className="upload-zone" style={{ marginBottom: 20 }} onClick={() => videoInputRef.current?.click()}>
@@ -494,11 +602,17 @@ export default function CreatePage() {
                         <div className="progress-bar-fill" style={{ width: `${uploadPercent}%` }} />
                       )}
                     </div>
-                    {uploadETA && uploadPercent < 95 && (
-                      <div style={{ textAlign: 'right', fontFamily: 'var(--sans)', fontSize: 11, color: 'var(--ink-muted)', marginTop: 5 }}>
-                        noch ca. {uploadETA}
-                      </div>
-                    )}
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: 6 }}>
+                      <span style={{ fontFamily: 'var(--sans)', fontSize: 11, color: uploadRetries > 0 ? 'var(--accent)' : 'var(--ink-muted)' }}>
+                        {uploadRetries > 0
+                          ? `Verbindung instabil · ${uploadRetries} Wiederholung${uploadRetries === 1 ? '' : 'en'}`
+                          : (uploadETA && uploadPercent < 95 ? `noch ca. ${uploadETA}` : ' ')}
+                      </span>
+                      <button type="button" onClick={cancelUpload}
+                        style={{ background: 'none', border: 'none', fontFamily: 'var(--sans)', fontSize: 11, letterSpacing: '0.1em', textTransform: 'uppercase', color: 'var(--ink-muted)', cursor: 'pointer', padding: 0 }}>
+                        Abbrechen ×
+                      </button>
+                    </div>
                   </div>
                 )}
 
