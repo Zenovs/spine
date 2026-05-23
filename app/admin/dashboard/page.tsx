@@ -1,5 +1,5 @@
 'use client';
-import { useState, useEffect, useCallback } from 'react';
+import { Fragment, useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { SiteHeader, SiteFooter } from '@/components/SiteHeader';
@@ -12,8 +12,86 @@ type QRCode = {
   created_at: string;
   email: string | null;
   sender_name: string | null;
+  message: string | null;
+  video_url: string | null;
+  image_url: string | null;
+  video_fit: 'contain' | 'cover' | null;
+  video_obj_x: number | null;
+  video_obj_y: number | null;
+  content_id: string | null;
   content_created_at: string | null;
 };
+
+function ContentDetail({ qr }: { qr: QRCode }) {
+  if (!qr.content_id) {
+    return (
+      <p style={{ fontFamily: 'var(--sans)', fontSize: 13, color: 'var(--ink-muted)', padding: '12px 0' }}>
+        Noch kein Inhalt hinterlegt.
+      </p>
+    );
+  }
+  const submittedAt = qr.content_created_at ? new Date(qr.content_created_at).toLocaleString('de-CH') : null;
+  return (
+    <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 1fr) auto', gap: 24, padding: '14px 0 4px', alignItems: 'start' }}>
+      <div style={{ minWidth: 0 }}>
+        <p className="eyebrow" style={{ marginBottom: 4 }}>— Persönliche Botschaft —</p>
+        {qr.sender_name && (
+          <p style={{ fontFamily: 'var(--serif)', fontStyle: 'italic', fontSize: 15, color: 'var(--ink)', marginBottom: 8 }}>
+            von {qr.sender_name}
+          </p>
+        )}
+        {qr.message ? (
+          <blockquote style={{ fontFamily: 'var(--serif)', fontStyle: 'italic', fontSize: 14, lineHeight: 1.6, color: 'var(--ink)', borderLeft: '2px solid var(--accent)', paddingLeft: 12, margin: 0, whiteSpace: 'pre-wrap', wordBreak: 'break-word' }}>
+            {qr.message}
+          </blockquote>
+        ) : (
+          <p style={{ fontFamily: 'var(--sans)', fontSize: 13, color: 'var(--ink-muted)' }}>
+            (keine Botschaft)
+          </p>
+        )}
+        {submittedAt && (
+          <p style={{ fontFamily: 'var(--sans)', fontSize: 11, color: 'var(--ink-muted)', marginTop: 10, letterSpacing: '0.05em' }}>
+            Eingereicht am {submittedAt}
+          </p>
+        )}
+      </div>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 12, width: 200 }}>
+        {qr.video_url ? (
+          <div>
+            <p className="eyebrow" style={{ marginBottom: 4 }}>— Video —</p>
+            <video
+              src={qr.video_url}
+              controls
+              playsInline
+              style={{
+                width: '100%', aspectRatio: '16/9', borderRadius: 3, background: '#111',
+                objectFit: qr.video_fit === 'cover' ? 'cover' : 'contain',
+                objectPosition: `${qr.video_obj_x ?? 50}% ${qr.video_obj_y ?? 50}%`,
+              }}
+            />
+            <a href={qr.video_url} target="_blank" rel="noopener noreferrer" style={{ display: 'block', marginTop: 4, fontFamily: 'var(--sans)', fontSize: 10, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'var(--ink-muted)' }}>
+              Original öffnen ↗
+            </a>
+          </div>
+        ) : (
+          <p style={{ fontFamily: 'var(--sans)', fontSize: 12, color: 'var(--ink-muted)' }}>Kein Video</p>
+        )}
+        {qr.image_url ? (
+          <div>
+            <p className="eyebrow" style={{ marginBottom: 4 }}>— Bild —</p>
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src={qr.image_url} alt="Bild zur Botschaft" style={{ width: '100%', borderRadius: 3, display: 'block' }} />
+            <a href={qr.image_url} target="_blank" rel="noopener noreferrer" style={{ display: 'block', marginTop: 4, fontFamily: 'var(--sans)', fontSize: 10, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'var(--ink-muted)' }}>
+              Original öffnen ↗
+            </a>
+          </div>
+        ) : (
+          <p style={{ fontFamily: 'var(--sans)', fontSize: 12, color: 'var(--ink-muted)' }}>Kein Bild</p>
+        )}
+      </div>
+    </div>
+  );
+}
 
 export default function AdminDashboard() {
   const router = useRouter();
@@ -25,6 +103,7 @@ export default function AdminDashboard() {
   const [baseUrl, setBaseUrl] = useState('');
   const [toast, setToast] = useState('');
   const [searchQuery, setSearchQuery] = useState('');
+  const [expandedCode, setExpandedCode] = useState<string | null>(null);
 
   const showToast = (msg: string) => {
     setToast(msg);
@@ -235,54 +314,93 @@ export default function AdminDashboard() {
                   <table className="admin-table">
                     <thead>
                       <tr>
+                        <th style={{ width: 28 }}></th>
                         <th>Code</th><th>Status</th><th>Notiz</th><th>Absender</th><th>E-Mail</th><th>Erstellt</th><th style={{ textAlign: 'right' }}>Aktionen</th>
                       </tr>
                     </thead>
                     <tbody>
-                      {filteredCodes.map(qr => (
-                        <tr key={qr.id}>
-                          <td><a href={`${baseUrl}/q/${qr.code}`} target="_blank" rel="noopener noreferrer" style={{ fontFamily: 'var(--sans)', fontWeight: 600, letterSpacing: '0.08em', color: 'var(--ink)', fontSize: 13 }}>{qr.code}</a></td>
-                          <td><span className={`badge badge-${qr.status}`}>{qr.status}</span></td>
-                          <td style={{ fontSize: 13, maxWidth: 160, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{qr.admin_note || <span style={{ opacity: 0.4 }}>—</span>}</td>
-                          <td style={{ fontSize: 13 }}>{qr.sender_name || <span style={{ opacity: 0.4 }}>—</span>}</td>
-                          <td style={{ fontSize: 12, color: 'var(--ink-muted)' }}>{qr.email || <span style={{ opacity: 0.4 }}>—</span>}</td>
-                          <td style={{ fontSize: 12, color: 'var(--ink-muted)', whiteSpace: 'nowrap' }}>{new Date(qr.created_at).toLocaleDateString('de-CH')}</td>
-                          <td><div style={{ display: 'flex', gap: 6, justifyContent: 'flex-end' }}>
-                            <button className="btn btn-ghost btn-sm" onClick={() => downloadQR(qr.code)}>SVG</button>
-                            <Link href={`/q/${qr.code}/view`} className="btn btn-ghost btn-sm" target="_blank">Ansicht</Link>
-                            {qr.status === 'locked' && <button className="btn btn-ghost btn-sm" onClick={() => resetQR(qr.code)}>Reset</button>}
-                            <button className="btn btn-danger btn-sm" onClick={() => deleteQR(qr.code)}>Löschen</button>
-                          </div></td>
-                        </tr>
-                      ))}
+                      {filteredCodes.map(qr => {
+                        const isExpanded = expandedCode === qr.code;
+                        const hasContent = qr.status === 'locked' && (qr.message || qr.video_url || qr.image_url);
+                        return (
+                          <Fragment key={qr.id}>
+                            <tr
+                              onClick={() => hasContent && setExpandedCode(isExpanded ? null : qr.code)}
+                              style={{ cursor: hasContent ? 'pointer' : 'default', background: isExpanded ? 'rgba(0,0,0,0.025)' : undefined }}
+                            >
+                              <td style={{ fontSize: 14, color: 'var(--ink-muted)', textAlign: 'center', userSelect: 'none' }}>
+                                {hasContent ? (isExpanded ? '▾' : '▸') : ''}
+                              </td>
+                              <td><a href={`${baseUrl}/q/${qr.code}`} target="_blank" rel="noopener noreferrer" onClick={e => e.stopPropagation()} style={{ fontFamily: 'var(--sans)', fontWeight: 600, letterSpacing: '0.08em', color: 'var(--ink)', fontSize: 13 }}>{qr.code}</a></td>
+                              <td><span className={`badge badge-${qr.status}`}>{qr.status}</span></td>
+                              <td style={{ fontSize: 13, maxWidth: 160, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{qr.admin_note || <span style={{ opacity: 0.4 }}>—</span>}</td>
+                              <td style={{ fontSize: 13 }}>{qr.sender_name || <span style={{ opacity: 0.4 }}>—</span>}</td>
+                              <td style={{ fontSize: 12, color: 'var(--ink-muted)' }}>{qr.email || <span style={{ opacity: 0.4 }}>—</span>}</td>
+                              <td style={{ fontSize: 12, color: 'var(--ink-muted)', whiteSpace: 'nowrap' }}>{new Date(qr.created_at).toLocaleDateString('de-CH')}</td>
+                              <td onClick={e => e.stopPropagation()}><div style={{ display: 'flex', gap: 6, justifyContent: 'flex-end' }}>
+                                <button className="btn btn-ghost btn-sm" onClick={() => downloadQR(qr.code)}>SVG</button>
+                                <Link href={`/q/${qr.code}/view`} className="btn btn-ghost btn-sm" target="_blank">Ansicht</Link>
+                                {qr.status === 'locked' && <button className="btn btn-ghost btn-sm" onClick={() => resetQR(qr.code)}>Reset</button>}
+                                <button className="btn btn-danger btn-sm" onClick={() => deleteQR(qr.code)}>Löschen</button>
+                              </div></td>
+                            </tr>
+                            {isExpanded && hasContent && (
+                              <tr>
+                                <td colSpan={8} style={{ background: 'rgba(0,0,0,0.025)', padding: '0 24px 20px' }}>
+                                  <ContentDetail qr={qr} />
+                                </td>
+                              </tr>
+                            )}
+                          </Fragment>
+                        );
+                      })}
                     </tbody>
                   </table>
                 </div>
                 {/* Mobile cards */}
                 <div style={{ display: 'flex', flexDirection: 'column' }}>
-                  {filteredCodes.map(qr => (
-                    <div key={qr.id} style={{ padding: '16px 20px', borderBottom: '1px solid var(--rule)' }}>
-                      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12, marginBottom: 8 }}>
-                        <a href={`${baseUrl}/q/${qr.code}`} target="_blank" rel="noopener noreferrer"
-                          style={{ fontFamily: 'var(--sans)', fontWeight: 600, fontSize: 14, letterSpacing: '0.08em', color: 'var(--ink)' }}>
-                          {qr.code}
-                        </a>
-                        <span className={`badge badge-${qr.status}`}>{qr.status}</span>
-                      </div>
-                      {(qr.admin_note || qr.sender_name || qr.email) && (
-                        <div style={{ fontFamily: 'var(--sans)', fontSize: 12, color: 'var(--ink-muted)', marginBottom: 10, lineHeight: 1.5 }}>
-                          {qr.admin_note && <div>{qr.admin_note}</div>}
-                          {qr.sender_name && <div>{qr.sender_name} · {qr.email}</div>}
+                  {filteredCodes.map(qr => {
+                    const isExpanded = expandedCode === qr.code;
+                    const hasContent = qr.status === 'locked' && (qr.message || qr.video_url || qr.image_url);
+                    return (
+                      <div key={qr.id} style={{ padding: '16px 20px', borderBottom: '1px solid var(--rule)' }}>
+                        <div
+                          onClick={() => hasContent && setExpandedCode(isExpanded ? null : qr.code)}
+                          style={{ cursor: hasContent ? 'pointer' : 'default' }}
+                        >
+                          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12, marginBottom: 8 }}>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                              {hasContent && (
+                                <span style={{ fontSize: 12, color: 'var(--ink-muted)' }}>{isExpanded ? '▾' : '▸'}</span>
+                              )}
+                              <a href={`${baseUrl}/q/${qr.code}`} target="_blank" rel="noopener noreferrer" onClick={e => e.stopPropagation()}
+                                style={{ fontFamily: 'var(--sans)', fontWeight: 600, fontSize: 14, letterSpacing: '0.08em', color: 'var(--ink)' }}>
+                                {qr.code}
+                              </a>
+                            </div>
+                            <span className={`badge badge-${qr.status}`}>{qr.status}</span>
+                          </div>
+                          {(qr.admin_note || qr.sender_name || qr.email) && (
+                            <div style={{ fontFamily: 'var(--sans)', fontSize: 12, color: 'var(--ink-muted)', marginBottom: 10, lineHeight: 1.5 }}>
+                              {qr.admin_note && <div>{qr.admin_note}</div>}
+                              {qr.sender_name && <div>{qr.sender_name} · {qr.email}</div>}
+                            </div>
+                          )}
                         </div>
-                      )}
-                      <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
-                        <button className="btn btn-ghost btn-sm" onClick={() => downloadQR(qr.code)}>SVG</button>
-                        <Link href={`/q/${qr.code}/view`} className="btn btn-ghost btn-sm" target="_blank">Ansicht</Link>
-                        {qr.status === 'locked' && <button className="btn btn-ghost btn-sm" onClick={() => resetQR(qr.code)}>Reset</button>}
-                        <button className="btn btn-danger btn-sm" onClick={() => deleteQR(qr.code)}>Löschen</button>
+                        <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+                          <button className="btn btn-ghost btn-sm" onClick={() => downloadQR(qr.code)}>SVG</button>
+                          <Link href={`/q/${qr.code}/view`} className="btn btn-ghost btn-sm" target="_blank">Ansicht</Link>
+                          {qr.status === 'locked' && <button className="btn btn-ghost btn-sm" onClick={() => resetQR(qr.code)}>Reset</button>}
+                          <button className="btn btn-danger btn-sm" onClick={() => deleteQR(qr.code)}>Löschen</button>
+                        </div>
+                        {isExpanded && hasContent && (
+                          <div style={{ marginTop: 14, paddingTop: 14, borderTop: '1px dashed var(--rule)' }}>
+                            <ContentDetail qr={qr} />
+                          </div>
+                        )}
                       </div>
-                    </div>
-                  ))}
+                    );
+                  })}
                 </div>
               </>
             )}

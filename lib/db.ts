@@ -78,6 +78,12 @@ export async function getAllQRCodes() {
       c.id AS content_id,
       c.email,
       c.sender_name,
+      c.message,
+      c.video_url,
+      c.image_url,
+      c.video_fit,
+      c.video_obj_x,
+      c.video_obj_y,
       c.created_at AS content_created_at
     FROM qr_codes q
     LEFT JOIN content c ON c.qr_code_id = q.id
