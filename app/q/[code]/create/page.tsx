@@ -18,21 +18,38 @@ function ulog(...args: unknown[]) {
   console.log(`[upload +${ms}ms]`, ...args);
 }
 
-// Wraps @vercel/blob/client upload() with a stall detector: if no progress event
-// fires for STALL_MS, abort and throw — surfaces hangs instead of waiting forever.
+// Wraps @vercel/blob/client upload() with three safeguards against the
+// SDK's silent retry-loop on flaky mobile networks:
+//   1. multipart=true — chunks are short, network drops only kill one chunk
+//      (single PUT retries reset progress to 0 → user sees endless oscillation)
+//   2. max-progress stall: aborts if the highest % reached doesn't advance
+//      for STALL_MS (catches retry loops that keep producing progress events)
+//   3. total timeout: hard cap on the entire upload (catches everything else)
 async function uploadWithStallGuard(
   pathname: string,
   file: File,
+  useMultipart: boolean,
   onProgress: (e: { percentage: number }) => void,
 ) {
-  const STALL_MS = 60_000;
+  const STALL_MS = 90_000;      // 90s without max-progress increase → abort
+  const TOTAL_MS = 5 * 60_000;  // 5min hard cap
   const controller = new AbortController();
-  let lastProgressAt = Date.now();
-  const stallTimer = setInterval(() => {
-    if (Date.now() - lastProgressAt > STALL_MS) {
-      ulog('upload STALL detected — aborting');
+  const startedAt = Date.now();
+  let maxPct = 0;
+  let maxAt = Date.now();
+  let lastPct = 0;
+  let retryDips = 0;
+
+  const watchdog = setInterval(() => {
+    const now = Date.now();
+    if (now - startedAt > TOTAL_MS) {
+      ulog('upload TOTAL TIMEOUT — aborting', { maxPct, retryDips });
       controller.abort();
-      clearInterval(stallTimer);
+      clearInterval(watchdog);
+    } else if (now - maxAt > STALL_MS) {
+      ulog('upload STALL (max% nicht gestiegen seit ' + STALL_MS / 1000 + 's) — aborting', { maxPct, retryDips });
+      controller.abort();
+      clearInterval(watchdog);
     }
   }, 5_000);
 
@@ -40,19 +57,30 @@ async function uploadWithStallGuard(
     return await upload(pathname, file, {
       access: 'public',
       handleUploadUrl: '/api/upload',
+      multipart: useMultipart,
       abortSignal: controller.signal,
       onUploadProgress: (e) => {
-        lastProgressAt = Date.now();
+        if (e.percentage > maxPct) {
+          maxPct = e.percentage;
+          maxAt = Date.now();
+        } else if (e.percentage < lastPct - 5) {
+          retryDips++;
+          ulog('upload retry detected (progress fiel zurück)', { from: lastPct.toFixed(1), to: e.percentage.toFixed(1), retryDips });
+        }
+        lastPct = e.percentage;
         onProgress(e);
       },
     });
   } catch (err) {
     if (controller.signal.aborted) {
-      throw new Error(`Upload hängt seit ${STALL_MS / 1000}s — Verbindung prüfen und erneut versuchen`);
+      const reason = Date.now() - startedAt > TOTAL_MS
+        ? `Upload-Timeout nach 5 Min`
+        : `Upload hängt bei ${Math.round(maxPct)}% (${retryDips} Retry-Versuche)`;
+      throw new Error(`${reason} — Verbindung zu schwach. Bitte auf WLAN wechseln und erneut versuchen.`);
     }
     throw err;
   } finally {
-    clearInterval(stallTimer);
+    clearInterval(watchdog);
   }
 }
 
@@ -159,7 +187,7 @@ export default function CreatePage() {
         const pathname = `videos/${Date.now()}.${ext}`;
         ulog('blob upload start', { pathname, sizeMB: (toUpload.size / 1e6).toFixed(2), type: toUpload.type });
 
-        const blob = await uploadWithStallGuard(pathname, toUpload, ({ percentage }) => {
+        const blob = await uploadWithStallGuard(pathname, toUpload, true, ({ percentage }) => {
           setUploadPercent(Math.min(Math.round(percentage), 95));
           const elapsed = (Date.now() - uploadStartRef.current) / 1000;
           if (percentage > 2 && elapsed > 0.5) {
@@ -180,7 +208,7 @@ export default function CreatePage() {
         uploadStartRef.current = Date.now();
         const ext = imageFile.name.split('.').pop() || 'jpg';
         const pathname = `images/${Date.now()}.${ext}`;
-        const blob = await uploadWithStallGuard(pathname, imageFile, ({ percentage }) => {
+        const blob = await uploadWithStallGuard(pathname, imageFile, false, ({ percentage }) => {
           setUploadPercent(Math.min(Math.round(percentage), 95));
         });
         ulog('image upload done', { url: blob.url });
