@@ -11,6 +11,51 @@ function formatETA(seconds: number) {
   return `${Math.ceil(seconds / 60)} Min.`;
 }
 
+// Diagnostic logger — visible in Safari Web Inspector on iPhone
+const t0 = typeof performance !== 'undefined' ? performance.now() : Date.now();
+function ulog(...args: unknown[]) {
+  const ms = Math.round((typeof performance !== 'undefined' ? performance.now() : Date.now()) - t0);
+  console.log(`[upload +${ms}ms]`, ...args);
+}
+
+// Wraps @vercel/blob/client upload() with a stall detector: if no progress event
+// fires for STALL_MS, abort and throw — surfaces hangs instead of waiting forever.
+async function uploadWithStallGuard(
+  pathname: string,
+  file: File,
+  onProgress: (e: { percentage: number }) => void,
+) {
+  const STALL_MS = 60_000;
+  const controller = new AbortController();
+  let lastProgressAt = Date.now();
+  const stallTimer = setInterval(() => {
+    if (Date.now() - lastProgressAt > STALL_MS) {
+      ulog('upload STALL detected — aborting');
+      controller.abort();
+      clearInterval(stallTimer);
+    }
+  }, 5_000);
+
+  try {
+    return await upload(pathname, file, {
+      access: 'public',
+      handleUploadUrl: '/api/upload',
+      abortSignal: controller.signal,
+      onUploadProgress: (e) => {
+        lastProgressAt = Date.now();
+        onProgress(e);
+      },
+    });
+  } catch (err) {
+    if (controller.signal.aborted) {
+      throw new Error(`Upload hängt seit ${STALL_MS / 1000}s — Verbindung prüfen und erneut versuchen`);
+    }
+    throw err;
+  } finally {
+    clearInterval(stallTimer);
+  }
+}
+
 const IMAGE_TEMPLATES = [
   { id: 't1', label: 'Weinberg', url: 'https://images.unsplash.com/photo-1506377247377-2a5b3b417ebb?w=400&h=300&fit=crop' },
   { id: 't2', label: 'Weinglas', url: 'https://images.unsplash.com/photo-1510812431401-41d2bd2722f3?w=400&h=300&fit=crop' },
@@ -73,20 +118,23 @@ export default function CreatePage() {
     e.preventDefault();
     setLoading(true);
     setError('');
+    ulog('submit start', { hasVideo: !!videoFile, hasImage: !!imageFile, imageSource });
 
     try {
       let videoUrl = '';
       let imageUrl = '';
 
       if (videoFile) {
+        ulog('video file', { name: videoFile.name, type: videoFile.type, sizeMB: (videoFile.size / 1e6).toFixed(2) });
         let toUpload = videoFile;
         try {
           const result = await compressVideo(
             videoFile,
-            (stage) => { setUploadProgress(stage); setUploadPercent(0); setUploadETA(''); },
+            (stage) => { ulog('compress stage:', stage); setUploadProgress(stage); setUploadPercent(0); setUploadETA(''); },
             (pct) => setUploadPercent(pct),
           );
           toUpload = result.file;
+          ulog('compress done', { didCompress: result.didCompress, originalMB: result.originalMB.toFixed(2), compressedMB: result.compressedMB.toFixed(2) });
           if (result.didCompress) {
             setUploadProgress(
               `Komprimiert: ${result.originalMB.toFixed(0)} MB → ${result.compressedMB.toFixed(0)} MB · Hochladen…`,
@@ -94,8 +142,13 @@ export default function CreatePage() {
           } else {
             setUploadProgress('Video wird hochgeladen…');
           }
-        } catch {
+        } catch (compErr) {
+          ulog('compression error — falling back to original:', compErr);
           setUploadProgress('Komprimierung fehlgeschlagen · lade Original hoch…');
+        }
+
+        if (toUpload.size === 0) {
+          throw new Error('Video-Datei ist leer (0 Byte) — bitte erneut auswählen');
         }
 
         setUploadProgress(prev => prev || 'Video wird hochgeladen…');
@@ -103,51 +156,41 @@ export default function CreatePage() {
         setUploadETA('');
         uploadStartRef.current = Date.now();
         const ext = toUpload.name.split('.').pop() || 'mp4';
-        const blob = await upload(
-          `videos/${Date.now()}.${ext}`,
-          toUpload,
-          {
-            access: 'public',
-            handleUploadUrl: '/api/upload',
-            multipart: true,
-            onUploadProgress: ({ percentage }) => {
-              // Cap at 95 — server still commits after the HTTP transfer ends
-              setUploadPercent(Math.min(Math.round(percentage), 95));
-              const elapsed = (Date.now() - uploadStartRef.current) / 1000;
-              if (percentage > 2 && elapsed > 0.5) {
-                const total = elapsed / (percentage / 100);
-                setUploadETA(formatETA(Math.max(0, total - elapsed)));
-              }
-            },
+        const pathname = `videos/${Date.now()}.${ext}`;
+        ulog('blob upload start', { pathname, sizeMB: (toUpload.size / 1e6).toFixed(2), type: toUpload.type });
+
+        const blob = await uploadWithStallGuard(pathname, toUpload, ({ percentage }) => {
+          setUploadPercent(Math.min(Math.round(percentage), 95));
+          const elapsed = (Date.now() - uploadStartRef.current) / 1000;
+          if (percentage > 2 && elapsed > 0.5) {
+            const total = elapsed / (percentage / 100);
+            setUploadETA(formatETA(Math.max(0, total - elapsed)));
           }
-        );
+        });
+        ulog('blob upload done', { url: blob.url });
         videoUrl = blob.url;
         setUploadPercent(100);
         setUploadETA('');
       }
 
       if (imageSource === 'upload' && imageFile) {
+        ulog('image upload start', { name: imageFile.name, sizeMB: (imageFile.size / 1e6).toFixed(2) });
         setUploadProgress('Bild wird hochgeladen…');
         setUploadPercent(0);
         uploadStartRef.current = Date.now();
         const ext = imageFile.name.split('.').pop() || 'jpg';
-        const blob = await upload(
-          `images/${Date.now()}.${ext}`,
-          imageFile,
-          {
-            access: 'public',
-            handleUploadUrl: '/api/upload',
-            onUploadProgress: ({ percentage }) => {
-              setUploadPercent(Math.min(Math.round(percentage), 95));
-            },
-          }
-        );
+        const pathname = `images/${Date.now()}.${ext}`;
+        const blob = await uploadWithStallGuard(pathname, imageFile, ({ percentage }) => {
+          setUploadPercent(Math.min(Math.round(percentage), 95));
+        });
+        ulog('image upload done', { url: blob.url });
         imageUrl = blob.url;
         setUploadPercent(100);
       } else if (imageSource === 'template' && selectedTemplate) {
         imageUrl = IMAGE_TEMPLATES.find(t => t.id === selectedTemplate)?.url || '';
       }
 
+      ulog('save content start');
       setUploadProgress('Botschaft wird gespeichert…');
       setUploadPercent(0);
       const res = await fetch('/api/content/save', {
@@ -156,11 +199,14 @@ export default function CreatePage() {
         body: JSON.stringify({ code, senderName, message, videoUrl, imageUrl }),
       });
       const data = await res.json();
+      ulog('save content response', { ok: res.ok, status: res.status, data });
       if (!res.ok) throw new Error(data.error || 'Speichern fehlgeschlagen');
 
       router.push(`/q/${code}/view`);
     } catch (e: unknown) {
-      setError(e instanceof Error ? e.message : 'Fehler aufgetreten');
+      ulog('ERROR caught:', e);
+      const msg = e instanceof Error ? `${e.name}: ${e.message}` : String(e);
+      setError(msg);
     } finally {
       setLoading(false);
       setUploadProgress('');
@@ -383,8 +429,14 @@ export default function CreatePage() {
                 )}
 
                 {error && (
-                  <div style={{ background: 'rgba(110,34,48,0.08)', border: '1px solid rgba(110,34,48,0.2)', padding: '10px 14px', marginBottom: 14, fontFamily: 'var(--sans)', fontSize: 13, color: 'var(--accent)', borderRadius: 2 }}>
+                  <div style={{ background: 'rgba(110,34,48,0.08)', border: '1px solid rgba(110,34,48,0.2)', padding: '10px 14px', marginBottom: 14, fontFamily: 'var(--sans)', fontSize: 13, color: 'var(--accent)', borderRadius: 2, wordBreak: 'break-word' }}>
                     {error}
+                  </div>
+                )}
+
+                {loading && uploadProgress && (
+                  <div style={{ fontFamily: 'var(--sans)', fontSize: 11, color: 'var(--ink-muted)', marginBottom: 12, textAlign: 'center', letterSpacing: '0.04em' }}>
+                    Bitte Tab geöffnet lassen und Bildschirm aktiv halten
                   </div>
                 )}
 
