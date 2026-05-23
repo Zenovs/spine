@@ -18,14 +18,30 @@ function ulog(...args: unknown[]) {
   console.log(`[upload +${ms}ms]`, ...args);
 }
 
-// Wraps @vercel/blob/client upload() with three safeguards against the
-// SDK's silent retry-loop on flaky mobile networks:
-//   1. multipart=true — chunks are short, a network drop only kills one chunk
-//      (single PUT retries reset progress to 0 → user sees endless oscillation)
+// Pre-flight: verify /api/upload is reachable and returns a valid token before
+// the SDK takes over. Surfaces token/env failures distinctly from blob-CDN issues.
+async function pingUploadEndpoint(): Promise<{ ok: boolean; status: number; text: string }> {
+  try {
+    const res = await fetch('/api/upload', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      // Intentionally malformed body — we only want to confirm the route runs and the
+      // env (BLOB_READ_WRITE_TOKEN) is wired. A real upload sends a proper HandleUploadBody.
+      body: JSON.stringify({ type: 'ping' }),
+    });
+    const text = await res.text();
+    return { ok: res.status < 500, status: res.status, text: text.slice(0, 200) };
+  } catch (e: unknown) {
+    return { ok: false, status: 0, text: e instanceof Error ? e.message : String(e) };
+  }
+}
+
+// Wraps @vercel/blob/client upload() with diagnostics and safeguards:
+//   1. multipart adapts to file size (small files use single PUT, less overhead)
 //   2. max-progress stall: aborts if the highest % reached doesn't advance
-//      for STALL_MS (catches retry loops that keep producing progress events)
 //   3. total timeout: hard cap on the entire upload
 //   4. external abort: user can cancel via the Cancel button
+//   5. logs every progress event and the underlying SDK error for diagnosis
 async function uploadWithStallGuard(
   pathname: string,
   file: File,
@@ -33,8 +49,8 @@ async function uploadWithStallGuard(
   externalSignal: AbortSignal,
   onProgress: (e: { percentage: number; retries: number }) => void,
 ) {
-  const STALL_MS = 45_000;      // 45s without max-progress advance → abort
-  const TOTAL_MS = 5 * 60_000;  // 5min hard cap
+  const STALL_MS = 45_000;
+  const TOTAL_MS = 5 * 60_000;
   const controller = new AbortController();
   if (externalSignal.aborted) controller.abort();
   const propagateAbort = () => controller.abort();
@@ -44,7 +60,11 @@ async function uploadWithStallGuard(
   let maxAt = Date.now();
   let lastPct = 0;
   let retryDips = 0;
+  let progressEvents = 0;
+  let firstByteAt = 0;
   let userCancelled = false;
+
+  ulog('[uwsg] start', { pathname, sizeMB: (file.size / 1e6).toFixed(2), type: file.type, multipart: useMultipart });
 
   const watchdog = setInterval(() => {
     const now = Date.now();
@@ -52,11 +72,11 @@ async function uploadWithStallGuard(
       userCancelled = true;
       clearInterval(watchdog);
     } else if (now - startedAt > TOTAL_MS) {
-      ulog('upload TOTAL TIMEOUT — aborting', { maxPct, retryDips });
+      ulog('[uwsg] TOTAL TIMEOUT — aborting', { maxPct, retryDips, progressEvents });
       controller.abort();
       clearInterval(watchdog);
     } else if (now - maxAt > STALL_MS) {
-      ulog('upload STALL (max% nicht gestiegen seit ' + STALL_MS / 1000 + 's) — aborting', { maxPct, retryDips });
+      ulog(`[uwsg] STALL — kein Fortschritt seit ${STALL_MS / 1000}s`, { maxPct, retryDips, progressEvents, firstByteSeconds: firstByteAt ? ((firstByteAt - startedAt) / 1000).toFixed(1) : 'never' });
       controller.abort();
       clearInterval(watchdog);
     }
@@ -69,26 +89,51 @@ async function uploadWithStallGuard(
       multipart: useMultipart,
       abortSignal: controller.signal,
       onUploadProgress: (e) => {
+        progressEvents++;
+        if (e.percentage > 0 && firstByteAt === 0) {
+          firstByteAt = Date.now();
+          ulog(`[uwsg] first bytes after ${((firstByteAt - startedAt) / 1000).toFixed(1)}s`);
+        }
+        if (progressEvents <= 3 || progressEvents % 20 === 0) {
+          ulog(`[uwsg] progress #${progressEvents}: ${e.percentage.toFixed(1)}% (max ${maxPct.toFixed(1)}%, retries ${retryDips})`);
+        }
         if (e.percentage > maxPct) {
           maxPct = e.percentage;
           maxAt = Date.now();
         } else if (e.percentage < lastPct - 5) {
           retryDips++;
-          ulog('upload retry detected (progress fiel zurück)', { from: lastPct.toFixed(1), to: e.percentage.toFixed(1), retryDips });
+          ulog('[uwsg] retry detected', { from: lastPct.toFixed(1), to: e.percentage.toFixed(1), retryDips });
         }
         lastPct = e.percentage;
         onProgress({ percentage: e.percentage, retries: retryDips });
       },
     });
   } catch (err) {
+    const elapsed = ((Date.now() - startedAt) / 1000).toFixed(1);
+    ulog(`[uwsg] FAILED after ${elapsed}s`, { progressEvents, maxPct, retryDips, errName: (err as Error)?.name, errMsg: (err as Error)?.message });
+
     if (userCancelled || externalSignal.aborted) {
       throw new Error('Upload abgebrochen');
     }
     if (controller.signal.aborted) {
+      // Tailor the error to what we actually observed
+      if (progressEvents <= 1 || maxPct === 0) {
+        // No bytes ever flowed. Most likely: /api/upload token endpoint or Vercel Blob CDN
+        // is not reachable / hangs. Run a ping to distinguish.
+        const ping = await pingUploadEndpoint();
+        ulog('[uwsg] post-fail ping /api/upload', ping);
+        if (!ping.ok && ping.status === 0) {
+          throw new Error(`Upload-Endpunkt nicht erreichbar (Netzwerk-Fehler: ${ping.text}). Kein Byte wurde übertragen.`);
+        }
+        if (ping.status >= 500) {
+          throw new Error(`Upload-Endpunkt antwortet mit Fehler ${ping.status}. Prüfe BLOB_READ_WRITE_TOKEN in Vercel-Env. Server-Antwort: ${ping.text}`);
+        }
+        throw new Error(`Upload hängt bei 0 % — Token-Endpunkt OK (${ping.status}), aber Vercel Blob CDN antwortet nicht. Möglicherweise CORS oder Firewall.`);
+      }
       const reason = Date.now() - startedAt > TOTAL_MS
         ? `Upload-Timeout nach 5 Min`
-        : `Upload hängt bei ${Math.round(maxPct)}% (${retryDips} Retry-Versuche)`;
-      throw new Error(`${reason} — Verbindung zu schwach. Bitte auf WLAN wechseln und erneut versuchen.`);
+        : `Upload hängt bei ${Math.round(maxPct)}% (${retryDips} Retries)`;
+      throw new Error(`${reason}. Versuch's nochmal — wenn das wiederholt passiert, prüfe BLOB_READ_WRITE_TOKEN auf Vercel.`);
     }
     throw err;
   } finally {
@@ -247,6 +292,16 @@ export default function CreatePage() {
         if (uploadAbortRef.current.signal.aborted) throw new Error('Abgebrochen');
         if (toUpload.size === 0) throw new Error('Video-Datei ist leer (0 Byte) — bitte erneut auswählen');
 
+        // Pre-flight: verify token endpoint reachable & env configured BEFORE wasting 45s
+        // on the SDK's silent retries when /api/upload is misconfigured.
+        setUploadProgress('Verbindung wird geprüft…');
+        const ping = await pingUploadEndpoint();
+        ulog('preflight ping /api/upload', ping);
+        if (!ping.ok) {
+          if (ping.status === 0) throw new Error(`Keine Verbindung zum Server: ${ping.text}`);
+          throw new Error(`Server-Fehler ${ping.status}: ${ping.text}`);
+        }
+
         const mb = (toUpload.size / 1e6).toFixed(0);
         setUploadProgress(`Video wird hochgeladen · ${mb} MB`);
         setUploadPercent(0);
@@ -256,7 +311,8 @@ export default function CreatePage() {
         const pathname = `videos/${Date.now()}.${ext}`;
         ulog('blob upload start', { pathname, sizeMB: mb, type: toUpload.type });
 
-        const blob = await uploadWithStallGuard(pathname, toUpload, true, uploadAbortRef.current.signal, ({ percentage, retries }) => {
+        const useMultipart = toUpload.size > 15 * 1024 * 1024;
+        const blob = await uploadWithStallGuard(pathname, toUpload, useMultipart, uploadAbortRef.current.signal, ({ percentage, retries }) => {
           setUploadPercent(Math.min(Math.round(percentage), 95));
           setUploadRetries(retries);
           const elapsed = (Date.now() - uploadStartRef.current) / 1000;

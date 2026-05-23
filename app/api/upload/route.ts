@@ -8,8 +8,26 @@ const ALLOWED_TYPES = [
 
 // Client-side upload handler — file goes browser→Blob directly, bypassing the 4.5MB function limit
 export async function POST(req: NextRequest) {
+  // Health-check path used by the client to distinguish "endpoint down" from
+  // "Vercel Blob CDN unreachable" before/after a failed upload.
+  let body: HandleUploadBody;
   try {
-    const body = await req.json() as HandleUploadBody;
+    const json = await req.json();
+    if (json && json.type === 'ping') {
+      const hasToken = !!process.env.BLOB_READ_WRITE_TOKEN;
+      return NextResponse.json({ ok: true, hasToken });
+    }
+    body = json as HandleUploadBody;
+  } catch (e: unknown) {
+    return NextResponse.json({ error: 'invalid body: ' + String(e) }, { status: 400 });
+  }
+
+  if (!process.env.BLOB_READ_WRITE_TOKEN) {
+    console.error('upload: BLOB_READ_WRITE_TOKEN missing in env');
+    return NextResponse.json({ error: 'BLOB_READ_WRITE_TOKEN not configured on server' }, { status: 500 });
+  }
+
+  try {
     const res = await handleUpload({
       body,
       request: req,
@@ -17,6 +35,8 @@ export async function POST(req: NextRequest) {
         allowedContentTypes: ALLOWED_TYPES,
         maximumSizeInBytes: 200 * 1024 * 1024,
         tokenPayload: pathname,
+        addRandomSuffix: true,
+        allowOverwrite: true,
       }),
     });
     return NextResponse.json(res);
