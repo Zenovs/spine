@@ -3,6 +3,10 @@ import { Fragment, useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { SiteHeader, SiteFooter } from '@/components/SiteHeader';
+import { SubmissionsView } from './SubmissionsView';
+import { ContentView } from './ContentView';
+
+type Tab = 'qr' | 'submissions' | 'content';
 
 type QRCode = {
   id: string;
@@ -104,6 +108,7 @@ export default function AdminDashboard() {
   const [toast, setToast] = useState('');
   const [searchQuery, setSearchQuery] = useState('');
   const [expandedCode, setExpandedCode] = useState<string | null>(null);
+  const [activeTab, setActiveTab] = useState<Tab>('qr');
 
   const showToast = (msg: string) => {
     setToast(msg);
@@ -231,6 +236,30 @@ export default function AdminDashboard() {
             </button>
           </div>
 
+          {/* Tab navigation */}
+          <div style={{ display: 'flex', gap: 0, borderBottom: '1px solid var(--rule)', marginBottom: 32, overflowX: 'auto' }}>
+            {([
+              { id: 'qr', label: 'QR-Codes' },
+              { id: 'submissions', label: 'E-Mail-Einreichungen' },
+              { id: 'content', label: 'Inhalte' },
+            ] as { id: Tab; label: string }[]).map(t => (
+              <button key={t.id} type="button" onClick={() => setActiveTab(t.id)}
+                style={{
+                  background: 'none', border: 'none', padding: '12px 18px', cursor: 'pointer',
+                  fontFamily: 'var(--sans)', fontSize: 12, letterSpacing: '0.12em', textTransform: 'uppercase',
+                  color: activeTab === t.id ? 'var(--ink)' : 'var(--ink-muted)',
+                  borderBottom: `2px solid ${activeTab === t.id ? 'var(--accent)' : 'transparent'}`,
+                  marginBottom: -1, whiteSpace: 'nowrap',
+                }}>
+                {t.label}
+              </button>
+            ))}
+          </div>
+
+          {activeTab === 'submissions' && <SubmissionsView />}
+          {activeTab === 'content' && <ContentView showToast={showToast} />}
+
+          {activeTab === 'qr' && <>
           {/* Stats */}
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 12, marginBottom: 32 }}>
             {[
@@ -405,6 +434,7 @@ export default function AdminDashboard() {
               </>
             )}
           </div>
+          </>}
         </div>
       </main>
 

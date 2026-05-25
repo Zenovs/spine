@@ -70,6 +70,43 @@ export async function getContent(qrCodeId: string) {
   return rows[0] || null;
 }
 
+export async function getAllContent() {
+  // Returns every content row joined with its qr_code, including those whose
+  // QR has been soft-deleted (deleted_at IS NOT NULL). The flag `qr_deleted`
+  // lets the admin distinguish active from orphaned content.
+  const sql = db();
+  return sql`
+    SELECT
+      c.id            AS content_id,
+      c.qr_code_id,
+      c.email,
+      c.sender_name,
+      c.message,
+      c.video_url,
+      c.image_url,
+      c.video_fit,
+      c.video_obj_x,
+      c.video_obj_y,
+      c.created_at    AS content_created_at,
+      q.code          AS qr_code,
+      q.status        AS qr_status,
+      q.deleted_at    AS qr_deleted_at,
+      q.admin_note    AS qr_admin_note,
+      (q.deleted_at IS NOT NULL) AS qr_deleted
+    FROM content c
+    LEFT JOIN qr_codes q ON q.id = c.qr_code_id
+    ORDER BY c.created_at DESC
+  `;
+}
+
+export async function deleteContent(contentId: string) {
+  const sql = db();
+  const rows = await sql`SELECT video_url, image_url FROM content WHERE id = ${contentId} LIMIT 1`;
+  const row = rows[0];
+  await sql`DELETE FROM content WHERE id = ${contentId}`;
+  return row || null;
+}
+
 export async function getAllQRCodes() {
   const sql = db();
   return sql`

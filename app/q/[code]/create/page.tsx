@@ -465,7 +465,7 @@ export default function CreatePage() {
                   <div style={{ marginBottom: 20 }}>
                     {/* Video box with drag-to-pan in cover mode */}
                     <div
-                      style={{ position: 'relative', borderRadius: 3, overflow: 'hidden', background: '#111', height: 280, cursor: videoFit === 'cover' ? 'grab' : 'default' }}
+                      style={{ position: 'relative', borderRadius: 3, overflow: 'hidden', background: '#111', aspectRatio: '1/1', cursor: videoFit === 'cover' ? 'grab' : 'default' }}
                       onTouchStart={e => {
                         if (videoFit !== 'cover') return;
                         const t = e.touches[0];
