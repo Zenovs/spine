@@ -68,7 +68,7 @@ export function SiteFooter() {
         <Image src="/futura-terram.png" alt="Futura Terram" height={22} width={74} style={{ height: 22, width: 'auto', objectFit: 'contain', opacity: 0.6 }} />
         <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: 4 }}>
           <div style={{ fontFamily: 'var(--sans)', fontSize: 11, letterSpacing: '0.08em', color: '#8C7D5E' }}>
-            © {new Date().getFullYear()} · Persönliche QR-Erlebnisse für besondere Flaschen
+            © {new Date().getFullYear()} · Persönliche Botschaften mit Futura Terram
           </div>
           <div style={{ fontFamily: 'var(--sans)', fontSize: 10, letterSpacing: '0.08em', color: '#5C5040' }}>
             powered by{' '}
