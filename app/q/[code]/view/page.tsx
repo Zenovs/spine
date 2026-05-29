@@ -138,7 +138,7 @@ export default async function ViewPage({ params }: { params: Promise<{ code: str
             <p style={{ fontFamily: 'var(--serif)', fontStyle: 'italic', fontSize: 'clamp(15px,1.6vw,18px)', color: 'var(--ink-soft)', marginBottom: 24, lineHeight: 1.6 }}>
               Entdecke unsere Weine und bestelle direkt online.
             </p>
-            <div className="btn-row" style={{ justifyContent: 'center' }}>
+            <div style={{ display: 'flex', gap: 12, justifyContent: 'center', flexWrap: 'wrap' }}>
               <a href="https://beispiel.ch" target="_blank" rel="noopener noreferrer" className="btn btn-primary">
                 Zur Website
               </a>
