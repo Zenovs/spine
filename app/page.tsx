@@ -8,7 +8,7 @@ export default function Home() {
         {/* Hero */}
         <section style={{ padding: 'clamp(64px,8vw,120px) 0' }}>
           <div className="container" style={{ maxWidth: 900, textAlign: 'center' }}>
-            <p className="eyebrow" style={{ textAlign: 'center' }}>— QR-Erlebnisse für besondere Flaschen —</p>
+            <p className="eyebrow" style={{ textAlign: 'center' }}>— Persönliche Botschaft —</p>
             <h1 className="display" style={{ textAlign: 'center', marginBottom: 28 }}>
               Jede Flasche erzählt <em>deine Geschichte</em>.
             </h1>

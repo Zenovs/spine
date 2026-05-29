@@ -132,6 +132,22 @@ export default async function ViewPage({ params }: { params: Promise<{ code: str
               </p>
             </div>
           )}
+          {/* CTA — always shown */}
+          <div style={{ marginTop: 48, borderTop: '1px solid var(--rule)', paddingTop: 36, textAlign: 'center' }}>
+            <p className="eyebrow" style={{ textAlign: 'center' }}>— Mehr entdecken —</p>
+            <p style={{ fontFamily: 'var(--serif)', fontStyle: 'italic', fontSize: 'clamp(15px,1.6vw,18px)', color: 'var(--ink-soft)', marginBottom: 24, lineHeight: 1.6 }}>
+              Entdecke unsere Weine und bestelle direkt online.
+            </p>
+            <div className="btn-row" style={{ justifyContent: 'center' }}>
+              <a href="https://beispiel.ch" target="_blank" rel="noopener noreferrer" className="btn btn-primary">
+                Zur Website
+              </a>
+              <a href="https://shop.beispiel.ch" target="_blank" rel="noopener noreferrer" className="btn btn-ghost">
+                Zum Shop
+              </a>
+            </div>
+          </div>
+
         </div>
       </main>
       <SiteFooter />
