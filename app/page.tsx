@@ -80,8 +80,8 @@ function HeroParticles() {
       pts = Array.from({ length: count }, () => ({
         x: Math.random() * w,
         y: Math.random() * h,
-        vx: (Math.random() - 0.5) * 0.25,
-        vy: (Math.random() - 0.5) * 0.25,
+        vx: (Math.random() - 0.5) * 0.5,
+        vy: (Math.random() - 0.5) * 0.5,
       }));
     }
 
@@ -93,6 +93,7 @@ function HeroParticles() {
       ctx.clearRect(0, 0, w, h);
 
       // advance
+      const MAX_SPEED = 0.8;
       for (const p of pts) {
         p.x += p.vx;
         p.y += p.vy;
@@ -112,9 +113,19 @@ function HeroParticles() {
             p.vy += (dy / (d || 1)) * f;
           }
         }
-        // damping
-        p.vx *= 0.99;
-        p.vy *= 0.99;
+
+        // Brownian drift + mild damping — keeps the constellation
+        // perpetually alive when the pointer isn't moving, while still
+        // letting pointer attraction perturb it temporarily.
+        p.vx = p.vx * 0.992 + (Math.random() - 0.5) * 0.012;
+        p.vy = p.vy * 0.992 + (Math.random() - 0.5) * 0.012;
+
+        // cap to prevent runaway acceleration after pointer attraction
+        const sp = Math.hypot(p.vx, p.vy);
+        if (sp > MAX_SPEED) {
+          p.vx = (p.vx / sp) * MAX_SPEED;
+          p.vy = (p.vy / sp) * MAX_SPEED;
+        }
       }
 
       // lines between points
