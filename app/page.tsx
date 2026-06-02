@@ -438,14 +438,17 @@ export default function Home() {
                   </div>
                 </div>
 
-                {/* Floating AR chips */}
-                <div className="ar-chip" style={{ top: '18%', right: '-12%', animation: 'floatA 4s ease-in-out infinite' }}>
+                {/* Floating AR chips — positioned close to the phone so they
+                    feel like UI annotations hovering over it, not detached
+                    labels. Negative offsets are small (~4%) so the chips
+                    overlap the phone edge instead of sitting in dead space. */}
+                <div className="ar-chip" style={{ top: '12%', right: '-4%', animation: 'floatA 4s ease-in-out infinite' }}>
                   Videobotschaft
                 </div>
-                <div className="ar-chip" style={{ top: '52%', left: '-16%', animation: 'floatB 5s ease-in-out infinite', animationDelay: '0.8s' }}>
+                <div className="ar-chip" style={{ top: '46%', left: '-6%', animation: 'floatB 5s ease-in-out infinite', animationDelay: '0.8s' }}>
                   Grussworte
                 </div>
-                <div className="ar-chip" style={{ bottom: '22%', right: '-10%', animation: 'floatA 4.5s ease-in-out infinite', animationDelay: '1.6s' }}>
+                <div className="ar-chip" style={{ bottom: '14%', right: '-2%', animation: 'floatA 4.5s ease-in-out infinite', animationDelay: '1.6s' }}>
                   3D-Element
                 </div>
               </div>
