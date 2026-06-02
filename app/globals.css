@@ -42,15 +42,15 @@
    LIGHT-BAND OVERRIDE (section--light)
 ───────────────────────────────────────────── */
 .section--light {
-  --paper:   #F3F1EC;
-  --paper-2: #EAE6DD;
+  --paper:   #FFFFFF;
+  --paper-2: #FAFAFB;
   --surface: #FFFFFF;
-  --surface-2: #F8F6F1;
+  --surface-2: #F5F5F7;
   --ink:     #15171C;
   --ink-2:   #4C515C;
   --ink-3:   #737880;
-  --line:    rgba(0,0,0,0.12);
-  --line-2:  rgba(0,0,0,0.06);
+  --line:    rgba(0,0,0,0.10);
+  --line-2:  rgba(0,0,0,0.05);
   --accent-tint: rgba(77,107,255,0.10);
   background: var(--paper);
   color: var(--ink);

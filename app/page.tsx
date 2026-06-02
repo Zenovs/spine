@@ -259,12 +259,7 @@ export default function Home() {
           <div className="container">
             <div className="section-head" data-reveal>
               <span className="eyebrow">So funktioniert es</span>
-              <h2 className="h2 steps__headline">
-                Scan&nbsp;it. Fill&nbsp;it. <em>Feel&nbsp;it.</em>
-              </h2>
-              <p className="lead" style={{ maxWidth: 520, margin: '12px auto 0' }}>
-                Drei Schritte. Ein Erlebnis.
-              </p>
+              <h2 className="h2">Drei Schritte.<br /><em>Ein Erlebnis.</em></h2>
             </div>
 
             <div className="steps">
