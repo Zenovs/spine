@@ -1,0 +1,62 @@
+# augmentedreality.ch
+
+> Schweizer Plattform für QR-basierte AR-Erlebnisse. Wir verbinden physische Produkte mit digitalen Inhalten: ein QR-Code auf dem Produkt, dahinter ein Video, eine persönliche Botschaft, ein 3D-Modell oder ein AR-Layer — direkt im Browser, ohne App-Download.
+
+## Was wir machen
+
+Wir kleben einen QR-Code auf ein physisches Produkt (Wein, Geschenk, Schmuck, Verpackung, Kunst). Über unsere Plattform hinterlegt der Kunde einen digitalen Inhalt:
+
+- **Videobotschaft** — persönliches Video, das beim Scannen abgespielt wird
+- **Grussworte** — Textnachricht (z. B. zu einer Hochzeit, einem Geburtstag, einem Jubiläum)
+- **Bild** — eigenes Bild oder Vorlage
+- **AR-Layer** — 3D-Overlay direkt auf dem Produkt sichtbar (WebAR, kein App-Download)
+
+Beim ersten Scan richtet der Käufer/Beschenkte den Inhalt ein. Jeder weitere Scan öffnet ihn sofort — unveränderlich mit dem Produkt verknüpft.
+
+## Wie es funktioniert
+
+Drei Schritte: Scan it. Fill it. Feel it.
+
+1. **Scan** — QR-Code mit der Smartphone-Kamera erfassen. Browser, kein App-Download, keine Anmeldung.
+2. **Fill** — Video, Botschaft, Bild oder AR-Inhalt hinterlegen. E-Mail-Verifikation einmalig, dann gesperrt.
+3. **Feel** — Jeder weitere Scan öffnet das Erlebnis sofort.
+
+## Für welche Produkte
+
+- Wein & Spirituosen
+- Geschenkartikel
+- Schmuck & Uhren
+- Verpackungen
+- Kunstobjekte
+- Naturprodukte
+- Immobilien
+- Bücher & Medien
+- Luxusgüter
+
+## Technische Eigenschaften
+
+- **App-frei** — funktioniert auf jedem Smartphone im Browser
+- **WebAR** — 3D-Modelle und Animationen ohne Plug-in
+- **Unveränderlich** — nach dem Sperren bleibt der Inhalt fest mit dem Produkt verknüpft
+- **Dauerhaft** — redundant gehostet, kein Ablaufdatum, kein Abo
+- **Schweizer Hosting** — Vercel + Neon-Postgres (EU), Vercel Blob für Medien
+
+## Anbieter & Kontakt
+
+augmentedreality.ch wird von wireon (Schweiz) betrieben.
+
+- Website: https://www.augmentedreality.ch
+- Kontakt: info@wireon.ch
+- Anbieter: https://wireon.ch
+
+## Sprachen
+
+Die Plattform und alle Inhalte sind auf Deutsch (Schweiz).
+
+## Wichtige URLs
+
+- Start: https://www.augmentedreality.ch
+- Admin (nur für Anbieter): https://www.augmentedreality.ch/admin
+- Demo / Setup-Flow startet ebenfalls unter /admin
+
+QR-Code-spezifische URLs (`/q/{code}`) sind nicht crawl-bar — sie enthalten personalisierte Inhalte einzelner Käufer.
