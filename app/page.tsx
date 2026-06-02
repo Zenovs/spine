@@ -248,30 +248,39 @@ export default function Home() {
           <div className="container">
             <div className="section-head" data-reveal>
               <span className="eyebrow">So funktioniert es</span>
-              <h2 className="h2">Drei Schritte.<br /><em>Ein Erlebnis.</em></h2>
+              <h2 className="h2 steps__headline">
+                Scan&nbsp;it. Fill&nbsp;it. <em>Feel&nbsp;it.</em>
+              </h2>
+              <p className="lead" style={{ maxWidth: 520, margin: '12px auto 0' }}>
+                Drei Schritte. Ein Erlebnis.
+              </p>
             </div>
 
             <div className="steps">
               {[
                 {
                   num: '01',
+                  verb: 'Scan',
                   title: 'QR-Code scannen',
                   body: 'Der QR-Code befindet sich bereits auf dem Produkt. Einfach scannen — beim ersten Mal gelangt man zur Eingabe der persönlichen Botschaft.',
                 },
                 {
                   num: '02',
+                  verb: 'Fill',
                   title: 'Inhalt hinterlegen',
                   body: 'Video hochladen, Grussworte verfassen, Bild wählen — oder direkt ein AR-Erlebnis konfigurieren. Einmalig, für immer gespeichert.',
                 },
                 {
                   num: '03',
+                  verb: 'Feel',
                   title: 'Erlebnis empfangen',
                   body: 'Jeder weitere Scan zeigt das Erlebnis direkt: Video, AR-Overlay, 3D-Modell. Unveränderlich mit dem Produkt verbunden.',
                 },
               ].map((step, i) => (
                 <div key={i} className="step" data-reveal data-reveal-delay={String(i + 2) as '2' | '3' | '4'}>
                   <span className="step__num">{step.num}</span>
-                  <h3 className="h3" style={{ marginBottom: 12, fontSize: '1.1rem' }}>{step.title}</h3>
+                  <h3 className="step__verb">{step.verb}<span className="step__verb-dot">.</span><span className="step__verb-it"> it.</span></h3>
+                  <h4 className="step__title">{step.title}</h4>
                   <p style={{ fontFamily: 'var(--font-sans)', fontSize: 15, lineHeight: 1.65, color: 'var(--ink-2)' }}>{step.body}</p>
                 </div>
               ))}
