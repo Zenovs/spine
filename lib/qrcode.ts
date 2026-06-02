@@ -9,7 +9,7 @@ export function generateCode(): string {
 }
 
 export async function generateQRCodeDataURL(code: string): Promise<string> {
-  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'https://weinbotschaft.vercel.app';
+  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'https://augmentedreality.ch';
   const url = `${baseUrl}/q/${code}`;
   return QRCode.toDataURL(url, {
     width: 400,
@@ -20,7 +20,7 @@ export async function generateQRCodeDataURL(code: string): Promise<string> {
 }
 
 export async function generateQRCodeSVG(code: string): Promise<string> {
-  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'https://weinbotschaft.vercel.app';
+  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'https://augmentedreality.ch';
   const url = `${baseUrl}/q/${code}`;
   return QRCode.toString(url, {
     type: 'svg',
