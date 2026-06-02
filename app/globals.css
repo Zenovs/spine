@@ -886,17 +886,49 @@ hr.rule { border: none; border-top: 1px solid var(--line); margin: 0; }
   color: var(--ink-2);
   line-height: 1.5;
 }
+/* Pull-quote — no card, no border. A large translucent opening quote
+   glyph sits behind the text as decorative ornament. The statement
+   itself reads as oversized serif italic with a thin accent rule below
+   so it still feels like an attribution moment without the boxed look. */
 .ar__note {
-  margin-top: 32px;
-  padding: 16px 20px;
-  background: var(--surface);
-  border: 1px solid var(--line);
-  border-left: 3px solid var(--accent);
-  border-radius: 0 6px 6px 0;
+  position: relative;
+  margin: 40px 0 0;
+  padding: 8px 0 0 64px;
+  background: transparent;
+  border: none;
+  border-radius: 0;
   font-family: var(--font-serif);
   font-style: italic;
-  font-size: 15px;
-  color: var(--ink-2);
+  font-weight: 400;
+  font-size: clamp(1.15rem, 0.95rem + 1vw, 1.5rem);
+  line-height: 1.4;
+  color: var(--ink);
+  max-width: 520px;
+  letter-spacing: -0.005em;
+}
+.ar__note::before {
+  content: '\201C';                /* opening curly double-quote */
+  position: absolute;
+  top: -28px;
+  left: -4px;
+  font-family: var(--font-display);
+  font-style: normal;
+  font-weight: 700;
+  font-size: 7rem;
+  line-height: 1;
+  color: var(--accent);
+  opacity: 0.22;
+  pointer-events: none;
+  user-select: none;
+}
+.ar__note::after {
+  content: '';
+  display: block;
+  width: 40px;
+  height: 2px;
+  margin-top: 20px;
+  background: var(--accent);
+  opacity: 0.7;
 }
 
 /* ─────────────────────────────────────────────

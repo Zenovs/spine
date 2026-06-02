@@ -365,9 +365,9 @@ export default function Home() {
                     Produktdetails in Echtzeit-3D zeigen
                   </li>
                 </ul>
-                <div className="ar__note" data-reveal data-reveal-delay="3">
-                  &ldquo;Physisch und digital — ein einziges Erlebnis.&rdquo;
-                </div>
+                <blockquote className="ar__note" data-reveal data-reveal-delay="3">
+                  Physisch und digital — ein einziges Erlebnis.
+                </blockquote>
               </div>
 
               {/* Phone mockup with AR animations */}
@@ -426,29 +426,25 @@ export default function Home() {
                       boxShadow: '0 0 20px rgba(77,107,255,0.8)',
                       top: '38%', left: '50%', transform: 'translate(-50%,-50%)',
                     }} />
-                    {/* Bottom scrim content */}
+                    {/* Bottom scrim — minimal AR status indicator only */}
                     <div style={{ position: 'absolute', bottom: 20, left: 14, right: 14 }}>
-                      <div style={{ fontFamily: 'var(--font-mono)', fontSize: '0.6rem', letterSpacing: '0.1em', textTransform: 'uppercase', color: 'rgba(124,146,255,0.8)', marginBottom: 6 }}>
+                      <div style={{ fontFamily: 'var(--font-mono)', fontSize: '0.6rem', letterSpacing: '0.1em', textTransform: 'uppercase', color: 'rgba(124,146,255,0.8)' }}>
                         AR aktiv
-                      </div>
-                      <div style={{ fontFamily: 'var(--font-sans)', fontSize: 12, color: 'rgba(244,246,250,0.8)', lineHeight: 1.4 }}>
-                        Jahrgang 2023 · Pinot Noir
                       </div>
                     </div>
                   </div>
                 </div>
 
-                {/* Floating AR chips — positioned close to the phone so they
-                    feel like UI annotations hovering over it, not detached
-                    labels. Negative offsets are small (~4%) so the chips
-                    overlap the phone edge instead of sitting in dead space. */}
-                <div className="ar-chip" style={{ top: '12%', right: '-4%', animation: 'floatA 4s ease-in-out infinite' }}>
+                {/* Floating AR chips — placed directly over the phone screen
+                    as if they were AR UI elements rendered on top of the
+                    camera view, not labels next to it. */}
+                <div className="ar-chip" style={{ top: '14%', right: '8%', animation: 'floatA 4s ease-in-out infinite' }}>
                   Videobotschaft
                 </div>
-                <div className="ar-chip" style={{ top: '46%', left: '-6%', animation: 'floatB 5s ease-in-out infinite', animationDelay: '0.8s' }}>
+                <div className="ar-chip" style={{ top: '46%', left: '14%', animation: 'floatB 5s ease-in-out infinite', animationDelay: '0.8s' }}>
                   Grussworte
                 </div>
-                <div className="ar-chip" style={{ bottom: '14%', right: '-2%', animation: 'floatA 4.5s ease-in-out infinite', animationDelay: '1.6s' }}>
+                <div className="ar-chip" style={{ bottom: '20%', right: '12%', animation: 'floatA 4.5s ease-in-out infinite', animationDelay: '1.6s' }}>
                   3D-Element
                 </div>
               </div>
