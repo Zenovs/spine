@@ -512,7 +512,7 @@ export default function Home() {
               </div>
               <div className="closing__actions" data-reveal data-reveal-delay="2">
                 <a href="https://www.augmentedreality.ch/admin" className="btn btn--primary">Demo starten <ArrowRight size={14} /></a>
-                <a href="mailto:info@augmentedreality.ch" className="btn btn--ghost">Kontakt aufnehmen</a>
+                <a href="mailto:info@wireon.ch" className="btn btn--ghost">Kontakt aufnehmen</a>
               </div>
             </div>
           </div>
