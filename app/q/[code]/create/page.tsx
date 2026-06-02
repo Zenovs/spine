@@ -385,7 +385,7 @@ export default function CreatePage() {
   return (
     <>
       <SiteHeader />
-      <main style={{ flex: 1, padding: 'clamp(24px,4vw,56px) 16px' }}>
+      <main style={{ flex: 1, paddingTop: 'clamp(88px,7vw,120px)', paddingBottom: 'clamp(24px,4vw,56px)', paddingLeft: 16, paddingRight: 16 }}>
         <div style={{ maxWidth: 560, margin: '0 auto' }}>
 
           {/* Step indicator */}

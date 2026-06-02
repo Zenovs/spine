@@ -5,7 +5,7 @@ export default function NotFound() {
   return (
     <>
       <SiteHeader />
-      <main style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '64px 32px' }}>
+      <main style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', paddingTop: 128, paddingBottom: 64, paddingLeft: 32, paddingRight: 32 }}>
         <div style={{ textAlign: 'center', maxWidth: 480 }}>
           <div style={{ fontFamily: 'var(--serif)', fontStyle: 'italic', fontSize: 80, color: 'var(--rule)', lineHeight: 1, marginBottom: 24 }}>404</div>
           <h1 className="section-title" style={{ marginBottom: 16 }}>QR-Code nicht gefunden</h1>

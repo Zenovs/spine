@@ -216,7 +216,7 @@ export default function AdminDashboard() {
   return (
     <>
       <SiteHeader showAdmin />
-      <main style={{ flex: 1, padding: 'clamp(32px,4vw,56px) 20px' }}>
+      <main style={{ flex: 1, paddingTop: 'clamp(96px,7vw,120px)', paddingBottom: 'clamp(32px,4vw,56px)', paddingLeft: 20, paddingRight: 20 }}>
         <div style={{ maxWidth: 1200, margin: '0 auto' }}>
 
           {/* Header */}

@@ -32,7 +32,7 @@ export default function AdminLoginPage() {
   return (
     <>
       <SiteHeader />
-      <main style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '64px 20px' }}>
+      <main style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', paddingTop: 128, paddingBottom: 64, paddingLeft: 20, paddingRight: 20 }}>
         <div style={{ width: '100%', maxWidth: 400 }}>
           <div className="card">
             <p className="eyebrow">Admin</p>

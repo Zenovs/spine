@@ -63,7 +63,7 @@ export default function VerifyPage() {
   return (
     <>
       <SiteHeader />
-      <main style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 'clamp(40px,6vw,80px) 20px' }}>
+      <main style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', paddingTop: 'clamp(104px,9vw,144px)', paddingBottom: 'clamp(40px,6vw,80px)', paddingLeft: 20, paddingRight: 20 }}>
         <div style={{ width: '100%', maxWidth: 480 }}>
           {/* Steps */}
           <div style={{ display: 'flex', alignItems: 'center', marginBottom: 40 }}>
