@@ -59,7 +59,7 @@ export function SubmissionsView() {
           { label: 'QR-Code gelöscht', value: rows.filter(r => r.qr_deleted).length },
         ].map((s, i) => (
           <div key={i} className="card card-sm" style={{ textAlign: 'center' }}>
-            <div style={{ fontFamily: 'var(--font-serif)', fontSize: 'clamp(28px,3vw,40px)', fontWeight: 500, color: 'var(--ink)' }}>{s.value}</div>
+            <div style={{ fontFamily: 'var(--font-display)', fontSize: 'clamp(28px,3vw,40px)', fontWeight: 700, color: 'var(--ink)', letterSpacing: '-0.015em' }}>{s.value}</div>
             <div style={{ fontFamily: 'var(--font-sans)', fontSize: 11, letterSpacing: '0.14em', textTransform: 'uppercase', color: 'var(--ink-3)', marginTop: 4 }}>{s.label}</div>
           </div>
         ))}
@@ -67,7 +67,7 @@ export function SubmissionsView() {
 
       <div className="card" style={{ padding: 0, overflow: 'hidden' }}>
         <div style={{ padding: '20px 24px', borderBottom: '1px solid var(--line)', display: 'flex', alignItems: 'center', gap: 12, flexWrap: 'wrap' }}>
-          <h2 style={{ fontFamily: 'var(--font-serif)', fontSize: 22, fontWeight: 500, flex: 1 }}>
+          <h2 style={{ fontFamily: 'var(--font-display)', fontSize: 20, fontWeight: 700, letterSpacing: '-0.01em', flex: 1 }}>
             E-Mail-Einreichungen <span style={{ fontFamily: 'var(--font-sans)', fontSize: 14, color: 'var(--ink-3)', fontWeight: 400 }}>({filtered.length})</span>
           </h2>
           <input

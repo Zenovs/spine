@@ -86,7 +86,7 @@ export function ContentView({ showToast }: { showToast: Toast }) {
               textAlign: 'center', cursor: 'pointer', background: filter === s.key ? 'rgba(110,34,48,0.05)' : undefined,
               borderColor: filter === s.key ? 'var(--accent)' : undefined,
             }}>
-            <div style={{ fontFamily: 'var(--font-serif)', fontSize: 'clamp(28px,3vw,40px)', fontWeight: 500, color: 'var(--ink)' }}>{s.value}</div>
+            <div style={{ fontFamily: 'var(--font-display)', fontSize: 'clamp(28px,3vw,40px)', fontWeight: 700, color: 'var(--ink)', letterSpacing: '-0.015em' }}>{s.value}</div>
             <div style={{ fontFamily: 'var(--font-sans)', fontSize: 11, letterSpacing: '0.14em', textTransform: 'uppercase', color: 'var(--ink-3)', marginTop: 4 }}>{s.label}</div>
           </button>
         ))}
@@ -94,7 +94,7 @@ export function ContentView({ showToast }: { showToast: Toast }) {
 
       <div className="card" style={{ padding: 0, overflow: 'hidden' }}>
         <div style={{ padding: '20px 24px', borderBottom: '1px solid var(--line)', display: 'flex', alignItems: 'center', gap: 12, flexWrap: 'wrap' }}>
-          <h2 style={{ fontFamily: 'var(--font-serif)', fontSize: 22, fontWeight: 500, flex: 1 }}>
+          <h2 style={{ fontFamily: 'var(--font-display)', fontSize: 20, fontWeight: 700, letterSpacing: '-0.01em', flex: 1 }}>
             Alle Inhalte <span style={{ fontFamily: 'var(--font-sans)', fontSize: 14, color: 'var(--ink-3)', fontWeight: 400 }}>({filtered.length})</span>
           </h2>
           <input
