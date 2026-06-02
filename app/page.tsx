@@ -1,6 +1,24 @@
 'use client';
 import { useEffect, useState, useRef } from 'react';
 import { SiteHeader, SiteFooter } from '@/components/SiteHeader';
+import {
+  QrCode,
+  AugmentedReality,
+  Cube,
+  ArrowRight,
+  Checkmark,
+  Star,
+  Play,
+  Bottles_01 as BottlesIcon,
+  Gift,
+  Watch,
+  Package,
+  PaintBrush,
+  Tree,
+  Home as HomeIcon,
+  Book,
+  DiamondOutline,
+} from '@carbon/icons-react';
 
 /* ─── Scroll-reveal observer ─── */
 function useReveal() {
@@ -88,9 +106,7 @@ function ScanStage() {
           {state === 1 && (
             <>
               <div className="play">
-                <svg viewBox="0 0 24 24" width={24} height={24} fill="white">
-                  <polygon points="5,3 19,12 5,21" />
-                </svg>
+                <Play size={24} fill="white" />
               </div>
               <p className="cap">
                 &ldquo;Alles Gute zum Geburtstag, liebe Anna!&rdquo;
@@ -185,23 +201,15 @@ export default function Home() {
                   Möglichkeiten: Video, AR-Overlays, 3D-Inhalte und persönliche Botschaften.
                 </p>
                 <div className="hero__actions" data-reveal data-reveal-delay="3">
-                  <a href="#how" className="btn btn--primary">Demo starten →</a>
+                  <a href="#how" className="btn btn--primary">Demo starten <ArrowRight size={14} /></a>
                   <a href="#ar" className="btn btn--ghost">AR entdecken</a>
                 </div>
                 <div className="hero__meta" data-reveal data-reveal-delay="4">
-                  <span className="tag">
-                    <svg viewBox="0 0 16 16" width={12} height={12} fill="none" stroke="currentColor" strokeWidth="1.5">
-                      <rect x="1" y="1" width="6" height="6" rx="1" />
-                      <rect x="9" y="1" width="6" height="6" rx="1" />
-                      <rect x="1" y="9" width="6" height="6" rx="1" />
-                      <rect x="11" y="11" width="2" height="2" fill="currentColor" stroke="none" />
-                    </svg>
-                    QR
-                  </span>
+                  <span className="tag"><QrCode size={14} /> QR</span>
                   <span className="sep" />
-                  <span className="tag">AR</span>
+                  <span className="tag"><AugmentedReality size={14} /> AR</span>
                   <span className="sep" />
-                  <span className="tag">Mixed Reality</span>
+                  <span className="tag"><Cube size={14} /> Mixed Reality</span>
                 </div>
               </div>
 
@@ -265,19 +273,19 @@ export default function Home() {
             </div>
             <div className="cats-grid">
               {[
-                { icon: '🍷', name: 'Wein & Spirituosen' },
-                { icon: '🎁', name: 'Geschenkartikel' },
-                { icon: '💍', name: 'Schmuck & Uhren' },
-                { icon: '📦', name: 'Verpackungen' },
-                { icon: '🎨', name: 'Kunstobjekte' },
-                { icon: '🌿', name: 'Naturprodukte' },
-                { icon: '🏡', name: 'Immobilien' },
-                { icon: '📚', name: 'Bücher & Medien' },
-                { icon: '✨', name: 'Luxusgüter' },
+                { Icon: BottlesIcon,    name: 'Wein & Spirituosen' },
+                { Icon: Gift,           name: 'Geschenkartikel' },
+                { Icon: Watch,          name: 'Schmuck & Uhren' },
+                { Icon: Package,        name: 'Verpackungen' },
+                { Icon: PaintBrush,     name: 'Kunstobjekte' },
+                { Icon: Tree,           name: 'Naturprodukte' },
+                { Icon: HomeIcon,       name: 'Immobilien' },
+                { Icon: Book,           name: 'Bücher & Medien' },
+                { Icon: DiamondOutline, name: 'Luxusgüter' },
               ].map((cat, i) => (
                 <div key={i} className="cat" data-reveal data-reveal-delay={String((i % 3) + 2) as '2' | '3' | '4'}>
-                  <div className="cat__icon" aria-hidden="true" style={{ fontSize: 18 }}>
-                    {cat.icon}
+                  <div className="cat__icon" aria-hidden="true">
+                    <cat.Icon size={20} />
                   </div>
                   <span className="cat__name">{cat.name}</span>
                 </div>
@@ -305,19 +313,19 @@ export default function Home() {
                 </div>
                 <ul className="ar__list" data-reveal data-reveal-delay="2">
                   <li>
-                    <span className="tick">✓</span>
+                    <span className="tick"><Checkmark size={14} /></span>
                     Kein App-Download — direkt im Browser
                   </li>
                   <li>
-                    <span className="tick">✓</span>
+                    <span className="tick"><Checkmark size={14} /></span>
                     3D-Modelle und Animationen auf jedem Gerät
                   </li>
                   <li>
-                    <span className="tick">✓</span>
+                    <span className="tick"><Checkmark size={14} /></span>
                     Videobotschaften mit AR-Overlay überlagern
                   </li>
                   <li>
-                    <span className="tick">✓</span>
+                    <span className="tick"><Checkmark size={14} /></span>
                     Produktdemos in Echtzeit-3D
                   </li>
                 </ul>
@@ -417,9 +425,7 @@ export default function Home() {
             <div className="permanence__inner">
               <div data-reveal>
                 <div className="seal">
-                  <svg viewBox="0 0 32 32" width={28} height={28} fill="none" stroke="currentColor" strokeWidth="1.5">
-                    <path d="M16 2 L19.1 9.5 L27 9.5 L20.9 14.5 L23.1 22 L16 17.5 L8.9 22 L11.1 14.5 L5 9.5 L12.9 9.5 Z" />
-                  </svg>
+                  <Star size={28} />
                 </div>
                 <span className="eyebrow">Dauerhaftigkeit</span>
                 <h2 className="h2">Einmal gespeichert.<br /><em>Für immer.</em></h2>
@@ -467,7 +473,7 @@ export default function Home() {
                 </p>
               </div>
               <div className="closing__actions" data-reveal data-reveal-delay="2">
-                <a href="#how" className="btn btn--primary">Demo starten →</a>
+                <a href="#how" className="btn btn--primary">Demo starten <ArrowRight size={14} /></a>
                 <a href="mailto:info@augmentedreality.ch" className="btn btn--ghost">Kontakt aufnehmen</a>
               </div>
             </div>

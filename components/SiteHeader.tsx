@@ -1,6 +1,7 @@
 'use client';
 import Link from 'next/link';
 import { useEffect } from 'react';
+import { ArrowRight } from '@carbon/icons-react';
 
 export function SiteHeader({ showAdmin = false }: { showAdmin?: boolean }) {
   useEffect(() => {
@@ -48,7 +49,7 @@ export function SiteHeader({ showAdmin = false }: { showAdmin?: boolean }) {
             </Link>
           )}
           <Link href="#how" className="btn btn--primary btn-sm">
-            Demo starten →
+            Demo starten <ArrowRight size={12} />
           </Link>
         </nav>
       </div>

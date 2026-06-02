@@ -2,6 +2,7 @@ import { notFound } from 'next/navigation';
 import { getQRCode, getContent } from '@/lib/db';
 import { SiteHeader, SiteFooter } from '@/components/SiteHeader';
 import { VideoPlayerClient } from './VideoPlayerClient';
+import { Locked } from '@carbon/icons-react';
 
 export default async function ViewPage({ params }: { params: Promise<{ code: string }> }) {
   const { code } = await params;
@@ -43,10 +44,7 @@ export default async function ViewPage({ params }: { params: Promise<{ code: str
 
       {/* Lock banner */}
       <div className="lock-banner">
-        <svg viewBox="0 0 16 16" width={14} height={14} fill="none" stroke="currentColor" strokeWidth="1.5">
-          <rect x="3" y="7" width="10" height="8" rx="1" />
-          <path d="M5 7V5a3 3 0 0 1 6 0v2" />
-        </svg>
+        <Locked size={14} />
         {isLocked ? 'Dieser Inhalt ist dauerhaft gespeichert und kann nicht mehr geändert werden.' : 'Standard-Inhalt · Noch keine persönliche Botschaft hinterlegt.'}
       </div>
 
