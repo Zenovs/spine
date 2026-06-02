@@ -1,5 +1,5 @@
 'use client';
-import { useEffect, useState, useRef } from 'react';
+import { useEffect, useRef } from 'react';
 import { SiteHeader, SiteFooter } from '@/components/SiteHeader';
 import {
   QrCode,
@@ -8,7 +8,6 @@ import {
   ArrowRight,
   Checkmark,
   Star,
-  Play,
   Bottles_01 as BottlesIcon,
   Gift,
   Watch,
@@ -41,135 +40,162 @@ function useReveal() {
   }, []);
 }
 
-/* ─── ScanStage interactive demo ─── */
-function ScanStage() {
-  const [state, setState] = useState(0); // 0=scan 1=content 2=ar
-  const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
+/* ─── Interactive particle network for the hero background ───
+   Canvas-based animation: ~80 points drift slowly, lines are drawn
+   between any two points within THRESHOLD px (opacity proportional
+   to closeness). The pointer attracts/connects too. Pure 2D canvas,
+   no external dependency. Respects prefers-reduced-motion. */
+function HeroParticles() {
+  const wrapRef = useRef<HTMLDivElement>(null);
+  const canvasRef = useRef<HTMLCanvasElement>(null);
 
   useEffect(() => {
-    timerRef.current = setInterval(() => {
-      setState(s => (s + 1) % 3);
-    }, 3000);
-    return () => { if (timerRef.current) clearInterval(timerRef.current); };
+    const wrap = wrapRef.current;
+    const canvas = canvasRef.current;
+    if (!wrap || !canvas) return;
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return;
+
+    const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const dpr = Math.min(window.devicePixelRatio || 1, 2);
+    let w = 0, h = 0;
+    let pointer = { x: -9999, y: -9999, active: false };
+    let raf = 0;
+
+    type Pt = { x: number; y: number; vx: number; vy: number };
+    let pts: Pt[] = [];
+
+    function resize() {
+      if (!wrap || !canvas || !ctx) return;
+      w = wrap.clientWidth;
+      h = wrap.clientHeight;
+      canvas.width = w * dpr;
+      canvas.height = h * dpr;
+      canvas.style.width = w + 'px';
+      canvas.style.height = h + 'px';
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+
+      // density scales with area, capped for perf
+      const count = Math.min(110, Math.max(40, Math.floor((w * h) / 14000)));
+      pts = Array.from({ length: count }, () => ({
+        x: Math.random() * w,
+        y: Math.random() * h,
+        vx: (Math.random() - 0.5) * 0.25,
+        vy: (Math.random() - 0.5) * 0.25,
+      }));
+    }
+
+    const LINE_DIST = 140;
+    const POINTER_DIST = 200;
+
+    function frame() {
+      if (!ctx) return;
+      ctx.clearRect(0, 0, w, h);
+
+      // advance
+      for (const p of pts) {
+        p.x += p.vx;
+        p.y += p.vy;
+        if (p.x < 0) { p.x = 0; p.vx *= -1; }
+        if (p.x > w) { p.x = w; p.vx *= -1; }
+        if (p.y < 0) { p.y = 0; p.vy *= -1; }
+        if (p.y > h) { p.y = h; p.vy *= -1; }
+
+        // gentle pull toward pointer
+        if (pointer.active) {
+          const dx = pointer.x - p.x;
+          const dy = pointer.y - p.y;
+          const d = Math.hypot(dx, dy);
+          if (d < POINTER_DIST) {
+            const f = (1 - d / POINTER_DIST) * 0.04;
+            p.vx += (dx / (d || 1)) * f;
+            p.vy += (dy / (d || 1)) * f;
+          }
+        }
+        // damping
+        p.vx *= 0.99;
+        p.vy *= 0.99;
+      }
+
+      // lines between points
+      for (let i = 0; i < pts.length; i++) {
+        for (let j = i + 1; j < pts.length; j++) {
+          const dx = pts[i].x - pts[j].x;
+          const dy = pts[i].y - pts[j].y;
+          const d = Math.hypot(dx, dy);
+          if (d < LINE_DIST) {
+            const a = 0.32 * (1 - d / LINE_DIST);
+            ctx.strokeStyle = `rgba(124,146,255,${a})`;
+            ctx.lineWidth = 0.8;
+            ctx.beginPath();
+            ctx.moveTo(pts[i].x, pts[i].y);
+            ctx.lineTo(pts[j].x, pts[j].y);
+            ctx.stroke();
+          }
+        }
+      }
+
+      // lines to pointer
+      if (pointer.active) {
+        for (const p of pts) {
+          const dx = p.x - pointer.x;
+          const dy = p.y - pointer.y;
+          const d = Math.hypot(dx, dy);
+          if (d < POINTER_DIST) {
+            const a = 0.6 * (1 - d / POINTER_DIST);
+            ctx.strokeStyle = `rgba(124,146,255,${a})`;
+            ctx.lineWidth = 1;
+            ctx.beginPath();
+            ctx.moveTo(p.x, p.y);
+            ctx.lineTo(pointer.x, pointer.y);
+            ctx.stroke();
+          }
+        }
+        // pointer node
+        ctx.fillStyle = 'rgba(124,146,255,0.9)';
+        ctx.beginPath();
+        ctx.arc(pointer.x, pointer.y, 3, 0, Math.PI * 2);
+        ctx.fill();
+      }
+
+      // nodes
+      for (const p of pts) {
+        ctx.fillStyle = 'rgba(124,146,255,0.85)';
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, 1.5, 0, Math.PI * 2);
+        ctx.fill();
+      }
+
+      raf = requestAnimationFrame(frame);
+    }
+
+    function onPointerMove(e: PointerEvent) {
+      if (!wrap) return;
+      const rect = wrap.getBoundingClientRect();
+      pointer.x = e.clientX - rect.left;
+      pointer.y = e.clientY - rect.top;
+      pointer.active = true;
+    }
+    function onPointerLeave() { pointer.active = false; }
+
+    resize();
+    window.addEventListener('resize', resize);
+    wrap.addEventListener('pointermove', onPointerMove);
+    wrap.addEventListener('pointerleave', onPointerLeave);
+    if (!reduceMotion) raf = requestAnimationFrame(frame);
+    else frame(); // single static frame
+
+    return () => {
+      cancelAnimationFrame(raf);
+      window.removeEventListener('resize', resize);
+      wrap.removeEventListener('pointermove', onPointerMove);
+      wrap.removeEventListener('pointerleave', onPointerLeave);
+    };
   }, []);
 
-  function goTo(n: number) {
-    if (timerRef.current) clearInterval(timerRef.current);
-    setState(n);
-    timerRef.current = setInterval(() => setState(s => (s + 1) % 3), 3000);
-  }
-
-  const hudLabels = ['Scannen', 'Erlebnis', 'AR aktiv'];
-
   return (
-    <div className="how__demo">
-      <div className="scanstage">
-        {/* Glow backdrop for AR state */}
-        <div className={`scanstage__glow${state === 2 ? ' visible' : ''}`} />
-
-        {/* HUD */}
-        <div className="hud">
-          <div className="hud__dot" />
-          {hudLabels[state]}
-        </div>
-
-        {/* Screen content */}
-        <div className="scanstage__screen">
-
-          {/* State 0: Scan */}
-          {state === 0 && (
-            <>
-              {/* Simple QR grid */}
-              <div className="bigqr" style={{ position: 'relative' }}>
-                {/* 7×7 = 49 cells, approximate QR pattern */}
-                {Array.from({ length: 49 }, (_, i) => {
-                  const row = Math.floor(i / 7);
-                  const col = i % 7;
-                  // Corner finders
-                  const inCorner =
-                    (row < 3 && col < 3) ||
-                    (row < 3 && col > 3) ||
-                    (row > 3 && col < 3);
-                  const isOff = !inCorner && Math.random() > 0.5;
-                  return <span key={i} className={isOff ? 'off' : ''} />;
-                })}
-                <div className="beam" style={{ top: '30%' }} />
-                <div className="reticle" style={{ top: '50%', left: '50%', transform: 'translate(-50%,-50%)' }} />
-              </div>
-              <p style={{ fontFamily: 'var(--font-mono)', fontSize: '0.72rem', letterSpacing: '0.1em', color: 'var(--ink-3)', textTransform: 'uppercase', textAlign: 'center' }}>
-                QR-Code wird erkannt
-              </p>
-            </>
-          )}
-
-          {/* State 1: Content */}
-          {state === 1 && (
-            <>
-              <div className="play">
-                <Play size={24} fill="white" />
-              </div>
-              <p className="cap">
-                &ldquo;Alles Gute zum Geburtstag, liebe Anna!&rdquo;
-              </p>
-              <div className="lines">
-                <span />
-                <span />
-                <span />
-              </div>
-            </>
-          )}
-
-          {/* State 2: AR */}
-          {state === 2 && (
-            <>
-              {/* Spinning rings */}
-              <div style={{ position: 'relative', width: 160, height: 160, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                <div style={{
-                  position: 'absolute', width: 160, height: 160, borderRadius: '50%',
-                  border: '2px solid rgba(77,107,255,0.5)',
-                  animation: 'spinC1 4s linear infinite',
-                  top: '50%', left: '50%',
-                }} />
-                <div style={{
-                  position: 'absolute', width: 120, height: 120, borderRadius: '50%',
-                  border: '1.5px solid rgba(124,146,255,0.4)',
-                  animation: 'spinC2 3s linear infinite',
-                  top: '50%', left: '50%',
-                }} />
-                <div style={{
-                  width: 48, height: 48, borderRadius: '50%',
-                  background: 'radial-gradient(circle, var(--accent) 0%, var(--accent-tint) 70%)',
-                  boxShadow: '0 0 32px var(--glow)',
-                  animation: 'pulseRing 2s ease-in-out infinite',
-                }} />
-                {/* 3 orbiting dots */}
-                {[0, 120, 240].map((deg, i) => (
-                  <div key={i} style={{
-                    position: 'absolute', top: '50%', left: '50%',
-                    width: 8, height: 8, borderRadius: '50%',
-                    background: i === 0 ? 'var(--accent)' : i === 1 ? 'var(--accent-strong)' : '#A8AEBC',
-                    animation: `orbitS ${2.5 + i * 0.4}s linear infinite`,
-                    animationDelay: `${i * 0.3}s`,
-                    transform: `rotate(${deg}deg) translateX(60px)`,
-                  }} />
-                ))}
-              </div>
-              <p style={{ fontFamily: 'var(--font-mono)', fontSize: '0.68rem', letterSpacing: '0.12em', color: 'var(--accent-strong)', textTransform: 'uppercase' }}>
-                AR-Modus aktiv
-              </p>
-            </>
-          )}
-        </div>
-      </div>
-
-      {/* Rail buttons */}
-      <div className="scanstage__rail">
-        {['Scannen', 'Erlebnis', 'AR'].map((label, i) => (
-          <button key={i} className={`rail__step${state === i ? ' active' : ''}`} onClick={() => goTo(i)}>
-            {label}
-          </button>
-        ))}
-      </div>
+    <div ref={wrapRef} className="hero-particles" aria-hidden="true">
+      <canvas ref={canvasRef} />
     </div>
   );
 }
@@ -184,38 +210,32 @@ export default function Home() {
       <main style={{ flex: 1 }}>
 
         {/* ═══════════════════════════════════
-            HERO
+            HERO  — interactive particle-network background
         ═══════════════════════════════════ */}
-        <section className="hero">
+        <section className="hero hero--center">
+          <HeroParticles />
           <div className="container">
-            <div className="hero__grid">
-              <div className="hero__copy">
-                <div className="hero__top" data-reveal>
-                  <span className="eyebrow">QR · AR · Mixed Reality</span>
-                  <h1 className="display">
-                    Jedes Produkt erzählt deine <em>Geschichte.</em>
-                  </h1>
-                </div>
-                <p className="hero__sub" data-reveal data-reveal-delay="2">
-                  Verbinde physische Produkte mit digitalen Erlebnissen. Ein QR-Code — unendliche
-                  Möglichkeiten: Video, AR-Overlays, 3D-Inhalte und persönliche Botschaften.
-                </p>
-                <div className="hero__actions" data-reveal data-reveal-delay="3">
-                  <a href="#how" className="btn btn--primary">Demo starten <ArrowRight size={14} /></a>
-                  <a href="#ar" className="btn btn--ghost">AR entdecken</a>
-                </div>
-                <div className="hero__meta" data-reveal data-reveal-delay="4">
-                  <span className="tag"><QrCode size={14} /> QR</span>
-                  <span className="sep" />
-                  <span className="tag"><AugmentedReality size={14} /> AR</span>
-                  <span className="sep" />
-                  <span className="tag"><Cube size={14} /> Mixed Reality</span>
-                </div>
+            <div className="hero__inner">
+              <div className="hero__top" data-reveal>
+                <span className="eyebrow eyebrow--solo">QR · AR · Mixed Reality</span>
+                <h1 className="display">
+                  Jedes Produkt erzählt deine <em>Geschichte.</em>
+                </h1>
               </div>
-
-              {/* Hero visual: ScanStage preview */}
-              <div data-reveal data-reveal-delay="2" style={{ display: 'flex', justifyContent: 'center' }}>
-                <ScanStage />
+              <p className="hero__sub" data-reveal data-reveal-delay="2">
+                Verbinde physische Produkte mit digitalen Erlebnissen. Ein QR-Code — unendliche
+                Möglichkeiten: Video, AR-Overlays, 3D-Inhalte und persönliche Botschaften.
+              </p>
+              <div className="hero__actions" data-reveal data-reveal-delay="3">
+                <a href="#how" className="btn btn--primary">Demo starten <ArrowRight size={14} /></a>
+                <a href="#ar" className="btn btn--ghost">AR entdecken</a>
+              </div>
+              <div className="hero__meta" data-reveal data-reveal-delay="4">
+                <span className="tag"><QrCode size={14} /> QR</span>
+                <span className="sep" />
+                <span className="tag"><AugmentedReality size={14} /> AR</span>
+                <span className="sep" />
+                <span className="tag"><Cube size={14} /> Mixed Reality</span>
               </div>
             </div>
           </div>
@@ -224,7 +244,7 @@ export default function Home() {
         {/* ═══════════════════════════════════
             HOW IT WORKS
         ═══════════════════════════════════ */}
-        <section id="how" className="section section--band">
+        <section id="how" className="section section--light">
           <div className="container">
             <div className="section-head" data-reveal>
               <span className="eyebrow">So funktioniert es</span>
@@ -297,7 +317,7 @@ export default function Home() {
         {/* ═══════════════════════════════════
             AR & MIXED REALITY
         ═══════════════════════════════════ */}
-        <section id="ar" className="section section--band">
+        <section id="ar" className="section section--light">
           <div className="container">
             <div className="ar__grid">
               {/* Copy column */}
