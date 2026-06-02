@@ -365,9 +365,6 @@ export default function Home() {
                     Produktdetails in Echtzeit-3D zeigen
                   </li>
                 </ul>
-                <blockquote className="ar__note" data-reveal data-reveal-delay="3">
-                  Physisch und digital — ein einziges Erlebnis.
-                </blockquote>
               </div>
 
               {/* Phone mockup with AR animations */}
