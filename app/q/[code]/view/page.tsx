@@ -55,7 +55,7 @@ export default async function ViewPage({ params }: { params: Promise<{ code: str
 
           {/* Header */}
           <div style={{ textAlign: 'center', marginBottom: 40 }}>
-            <p className="eyebrow" style={{ textAlign: 'center' }}>— Persönliche Botschaft —</p>
+            <p className="eyebrow" style={{ textAlign: 'center' }}>Persönliche Botschaft</p>
             {senderName ? (
               <h1 className="display" style={{ textAlign: 'center' }}>
                 Von <em>{senderName}</em>
@@ -85,7 +85,7 @@ export default async function ViewPage({ params }: { params: Promise<{ code: str
 
               {/* Image */}
               {imageUrl && (
-                <div style={{ borderRadius: 3, overflow: 'hidden', border: '1px solid var(--rule)' }}>
+                <div style={{ borderRadius: 3, overflow: 'hidden', border: '1px solid var(--line)' }}>
                   {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img
                     src={imageUrl}
@@ -98,9 +98,9 @@ export default async function ViewPage({ params }: { params: Promise<{ code: str
               {/* Message */}
               {message && (
                 <div className="card">
-                  <p className="eyebrow">— Grussworte —</p>
+                  <p className="eyebrow">Grussworte</p>
                   <blockquote style={{
-                    fontFamily: 'var(--serif)',
+                    fontFamily: 'var(--font-serif)',
                     fontStyle: 'italic',
                     fontSize: 'clamp(18px,2vw,24px)',
                     lineHeight: 1.65,
@@ -112,12 +112,12 @@ export default async function ViewPage({ params }: { params: Promise<{ code: str
                     {message}
                   </blockquote>
                   {senderName && (
-                    <div style={{ marginTop: 20, paddingTop: 16, borderTop: '1px solid var(--rule)', display: 'flex', alignItems: 'center', gap: 12 }}>
+                    <div style={{ marginTop: 20, paddingTop: 16, borderTop: '1px solid var(--line)', display: 'flex', alignItems: 'center', gap: 12 }}>
                       <svg viewBox="0 0 220 60" width="140" height="36" fill="none" stroke="var(--accent)" strokeWidth="1.5" strokeLinecap="round">
                         <path d="M6 38 C 16 22, 28 14, 38 20 C 46 26, 38 40, 30 38 C 24 36, 30 28, 42 28 L 62 32 C 70 32, 74 26, 78 18 C 80 14, 86 14, 86 22 L 86 36 C 86 42, 92 42, 96 34 L 104 22 C 108 16, 114 18, 114 26 L 114 38 C 114 44, 122 42, 128 34 C 134 26, 142 22, 150 28 C 158 34, 156 42, 148 42 C 142 42, 144 34, 156 34 L 178 38 C 188 38, 196 30, 200 22" />
                       </svg>
-                      <div style={{ borderLeft: '1px solid var(--rule)', paddingLeft: 14 }}>
-                        <div style={{ fontFamily: 'var(--serif)', fontStyle: 'italic', fontSize: 20, color: 'var(--ink)' }}>{senderName}</div>
+                      <div style={{ borderLeft: '1px solid var(--line)', paddingLeft: 14 }}>
+                        <div style={{ fontFamily: 'var(--font-serif)', fontStyle: 'italic', fontSize: 20, color: 'var(--ink)' }}>{senderName}</div>
                       </div>
                     </div>
                   )}
@@ -126,16 +126,16 @@ export default async function ViewPage({ params }: { params: Promise<{ code: str
             </div>
           ) : (
             <div className="card" style={{ textAlign: 'center', padding: 'clamp(40px,6vw,64px)' }}>
-              <div style={{ fontFamily: 'var(--serif)', fontStyle: 'italic', fontSize: 48, color: 'var(--rule)', marginBottom: 20 }}>◇</div>
+              <div style={{ fontFamily: 'var(--font-serif)', fontStyle: 'italic', fontSize: 48, color: 'var(--line)', marginBottom: 20 }}>◇</div>
               <p className="lede" style={{ textAlign: 'center' }}>
                 Dieser QR-Code hat noch keinen Inhalt. Scan nach dem Aufkleben auf die Flasche.
               </p>
             </div>
           )}
           {/* CTA — always shown */}
-          <div style={{ marginTop: 48, borderTop: '1px solid var(--rule)', paddingTop: 36, textAlign: 'center' }}>
-            <p className="eyebrow" style={{ textAlign: 'center' }}>— Mehr entdecken —</p>
-            <p style={{ fontFamily: 'var(--serif)', fontStyle: 'italic', fontSize: 'clamp(15px,1.6vw,18px)', color: 'var(--ink-soft)', marginBottom: 24, lineHeight: 1.6 }}>
+          <div style={{ marginTop: 48, borderTop: '1px solid var(--line)', paddingTop: 36, textAlign: 'center' }}>
+            <p className="eyebrow" style={{ textAlign: 'center' }}>Mehr entdecken</p>
+            <p style={{ fontFamily: 'var(--font-serif)', fontStyle: 'italic', fontSize: 'clamp(15px,1.6vw,18px)', color: 'var(--ink-2)', marginBottom: 24, lineHeight: 1.6 }}>
               Entdecke unsere Weine und bestelle direkt online.
             </p>
             <div style={{ display: 'flex', gap: 12, justifyContent: 'center', flexWrap: 'wrap' }}>

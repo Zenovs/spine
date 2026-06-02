@@ -59,16 +59,16 @@ export function SubmissionsView() {
           { label: 'QR-Code gelöscht', value: rows.filter(r => r.qr_deleted).length },
         ].map((s, i) => (
           <div key={i} className="card card-sm" style={{ textAlign: 'center' }}>
-            <div style={{ fontFamily: 'var(--serif)', fontSize: 'clamp(28px,3vw,40px)', fontWeight: 500, color: 'var(--ink)' }}>{s.value}</div>
-            <div style={{ fontFamily: 'var(--sans)', fontSize: 11, letterSpacing: '0.14em', textTransform: 'uppercase', color: 'var(--ink-muted)', marginTop: 4 }}>{s.label}</div>
+            <div style={{ fontFamily: 'var(--font-serif)', fontSize: 'clamp(28px,3vw,40px)', fontWeight: 500, color: 'var(--ink)' }}>{s.value}</div>
+            <div style={{ fontFamily: 'var(--font-sans)', fontSize: 11, letterSpacing: '0.14em', textTransform: 'uppercase', color: 'var(--ink-3)', marginTop: 4 }}>{s.label}</div>
           </div>
         ))}
       </div>
 
       <div className="card" style={{ padding: 0, overflow: 'hidden' }}>
-        <div style={{ padding: '20px 24px', borderBottom: '1px solid var(--rule)', display: 'flex', alignItems: 'center', gap: 12, flexWrap: 'wrap' }}>
-          <h2 style={{ fontFamily: 'var(--serif)', fontSize: 22, fontWeight: 500, flex: 1 }}>
-            E-Mail-Einreichungen <span style={{ fontFamily: 'var(--sans)', fontSize: 14, color: 'var(--ink-muted)', fontWeight: 400 }}>({filtered.length})</span>
+        <div style={{ padding: '20px 24px', borderBottom: '1px solid var(--line)', display: 'flex', alignItems: 'center', gap: 12, flexWrap: 'wrap' }}>
+          <h2 style={{ fontFamily: 'var(--font-serif)', fontSize: 22, fontWeight: 500, flex: 1 }}>
+            E-Mail-Einreichungen <span style={{ fontFamily: 'var(--font-sans)', fontSize: 14, color: 'var(--ink-3)', fontWeight: 400 }}>({filtered.length})</span>
           </h2>
           <input
             type="text"
@@ -87,7 +87,7 @@ export function SubmissionsView() {
         </div>
 
         {loading ? (
-          <div style={{ padding: 48, textAlign: 'center', fontFamily: 'var(--sans)', fontSize: 14, color: 'var(--ink-muted)' }}>
+          <div style={{ padding: 48, textAlign: 'center', fontFamily: 'var(--font-sans)', fontSize: 14, color: 'var(--ink-3)' }}>
             Lade Einreichungen…
           </div>
         ) : filtered.length === 0 ? (
@@ -109,11 +109,11 @@ export function SubmissionsView() {
                 <tbody>
                   {filtered.map(r => (
                     <tr key={r.content_id}>
-                      <td style={{ fontSize: 13, fontFamily: 'var(--sans)' }}>{r.email || <span style={{ opacity: 0.4 }}>—</span>}</td>
+                      <td style={{ fontSize: 13, fontFamily: 'var(--font-sans)' }}>{r.email || <span style={{ opacity: 0.4 }}>—</span>}</td>
                       <td style={{ fontSize: 13 }}>{r.sender_name || <span style={{ opacity: 0.4 }}>—</span>}</td>
                       <td>
                         {r.qr_code ? (
-                          <a href={`/q/${r.qr_code}/view`} target="_blank" rel="noopener noreferrer" style={{ fontFamily: 'var(--sans)', fontWeight: 600, letterSpacing: '0.06em', color: 'var(--ink)', fontSize: 12 }}>
+                          <a href={`/q/${r.qr_code}/view`} target="_blank" rel="noopener noreferrer" style={{ fontFamily: 'var(--font-sans)', fontWeight: 600, letterSpacing: '0.06em', color: 'var(--ink)', fontSize: 12 }}>
                             {r.qr_code}
                           </a>
                         ) : <span style={{ opacity: 0.4 }}>—</span>}
@@ -123,7 +123,7 @@ export function SubmissionsView() {
                           ? <span className="badge badge-deleted" style={{ fontSize: 10 }}>QR gelöscht</span>
                           : <span className={`badge badge-${r.qr_status || 'pending'}`} style={{ fontSize: 10 }}>{r.qr_status || '—'}</span>}
                       </td>
-                      <td style={{ fontSize: 12, color: 'var(--ink-muted)', whiteSpace: 'nowrap' }}>
+                      <td style={{ fontSize: 12, color: 'var(--ink-3)', whiteSpace: 'nowrap' }}>
                         {new Date(r.content_created_at).toLocaleString('de-CH')}
                       </td>
                     </tr>
@@ -134,14 +134,14 @@ export function SubmissionsView() {
             {/* Mobile list */}
             <div style={{ display: 'flex', flexDirection: 'column' }}>
               {filtered.map(r => (
-                <div key={r.content_id} style={{ padding: '14px 20px', borderBottom: '1px solid var(--rule)' }}>
+                <div key={r.content_id} style={{ padding: '14px 20px', borderBottom: '1px solid var(--line)' }}>
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 10 }}>
                     <div style={{ flex: 1, minWidth: 0 }}>
-                      <div style={{ fontFamily: 'var(--sans)', fontSize: 13, fontWeight: 600, color: 'var(--ink)', wordBreak: 'break-all' }}>{r.email || '—'}</div>
-                      {r.sender_name && <div style={{ fontFamily: 'var(--sans)', fontSize: 12, color: 'var(--ink-muted)' }}>{r.sender_name}</div>}
-                      <div style={{ fontFamily: 'var(--sans)', fontSize: 11, color: 'var(--ink-muted)', marginTop: 4 }}>
+                      <div style={{ fontFamily: 'var(--font-sans)', fontSize: 13, fontWeight: 600, color: 'var(--ink)', wordBreak: 'break-all' }}>{r.email || '—'}</div>
+                      {r.sender_name && <div style={{ fontFamily: 'var(--font-sans)', fontSize: 12, color: 'var(--ink-3)' }}>{r.sender_name}</div>}
+                      <div style={{ fontFamily: 'var(--font-sans)', fontSize: 11, color: 'var(--ink-3)', marginTop: 4 }}>
                         {r.qr_code && (
-                          <a href={`/q/${r.qr_code}/view`} target="_blank" rel="noopener noreferrer" style={{ color: 'var(--ink-muted)', letterSpacing: '0.05em' }}>
+                          <a href={`/q/${r.qr_code}/view`} target="_blank" rel="noopener noreferrer" style={{ color: 'var(--ink-3)', letterSpacing: '0.05em' }}>
                             {r.qr_code}
                           </a>
                         )}

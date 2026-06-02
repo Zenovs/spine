@@ -396,18 +396,18 @@ export default function CreatePage() {
                   <div style={{
                     width: 28, height: 28, borderRadius: '50%', fontSize: 13,
                     background: step > s.n ? 'var(--accent)' : step === s.n ? 'var(--ink)' : 'transparent',
-                    border: `1.5px solid ${step > s.n ? 'var(--accent)' : step === s.n ? 'var(--ink)' : 'var(--rule)'}`,
-                    color: step >= s.n ? 'var(--bg)' : 'var(--ink-muted)',
+                    border: `1.5px solid ${step > s.n ? 'var(--accent)' : step === s.n ? 'var(--ink)' : 'var(--line)'}`,
+                    color: step >= s.n ? 'var(--paper)' : 'var(--ink-3)',
                     display: 'flex', alignItems: 'center', justifyContent: 'center',
-                    fontFamily: 'var(--serif)',
+                    fontFamily: 'var(--font-serif)',
                   }}>
                     {step > s.n ? '✓' : s.n}
                   </div>
-                  <span style={{ fontFamily: 'var(--sans)', fontSize: 9, letterSpacing: '0.12em', textTransform: 'uppercase', color: step === s.n ? 'var(--ink)' : 'var(--ink-muted)' }}>
+                  <span style={{ fontFamily: 'var(--font-sans)', fontSize: 9, letterSpacing: '0.12em', textTransform: 'uppercase', color: step === s.n ? 'var(--ink)' : 'var(--ink-3)' }}>
                     {s.label}
                   </span>
                 </div>
-                {i < 2 && <div key={`line-${i}`} style={{ flex: 1, height: 1, background: 'var(--rule)', margin: '0 8px', marginBottom: 16 }} />}
+                {i < 2 && <div key={`line-${i}`} style={{ flex: 1, height: 1, background: 'var(--line)', margin: '0 8px', marginBottom: 16 }} />}
               </>
             ))}
           </div>
@@ -417,11 +417,11 @@ export default function CreatePage() {
             {/* ── Step 1: Text ── */}
             {step === 1 && (
               <div className="card">
-                <p className="eyebrow">— 1 / 3 —</p>
+                <p className="eyebrow">1 / 3</p>
                 <h1 className="section-title" style={{ fontSize: 'clamp(22px,5vw,38px)', marginBottom: 8 }}>
                   Deine <em>Grussworte</em>
                 </h1>
-                <p style={{ fontFamily: 'var(--sans)', fontSize: 14, color: 'var(--ink-soft)', marginBottom: 24, lineHeight: 1.6 }}>
+                <p style={{ fontFamily: 'var(--font-sans)', fontSize: 14, color: 'var(--ink-2)', marginBottom: 24, lineHeight: 1.6 }}>
                   Was möchtest du dem Empfänger mitteilen?
                 </p>
 
@@ -438,7 +438,7 @@ export default function CreatePage() {
                     placeholder="Schreibe hier deine persönliche Botschaft…"
                     value={message} onChange={e => setMessage(e.target.value)}
                     style={{ minHeight: 140, fontSize: 16 }} required />
-                  <div style={{ textAlign: 'right', fontFamily: 'var(--sans)', fontSize: 11, color: 'var(--ink-muted)', marginTop: 4 }}>
+                  <div style={{ textAlign: 'right', fontFamily: 'var(--font-sans)', fontSize: 11, color: 'var(--ink-3)', marginTop: 4 }}>
                     {message.length} Zeichen
                   </div>
                 </div>
@@ -453,11 +453,11 @@ export default function CreatePage() {
             {/* ── Step 2: Video ── */}
             {step === 2 && (
               <div className="card">
-                <p className="eyebrow">— 2 / 3 —</p>
+                <p className="eyebrow">2 / 3</p>
                 <h1 className="section-title" style={{ fontSize: 'clamp(22px,5vw,38px)', marginBottom: 8 }}>
                   Dein <em>Video</em>
                 </h1>
-                <p style={{ fontFamily: 'var(--sans)', fontSize: 14, color: 'var(--ink-soft)', marginBottom: 24, lineHeight: 1.6 }}>
+                <p style={{ fontFamily: 'var(--font-sans)', fontSize: 14, color: 'var(--ink-2)', marginBottom: 24, lineHeight: 1.6 }}>
                   Optional: Lade eine Videobotschaft hoch (max. 200 MB).
                 </p>
 
@@ -494,7 +494,7 @@ export default function CreatePage() {
                         }}
                       />
                       {videoFit === 'cover' && (
-                        <div style={{ position: 'absolute', bottom: 8, left: '50%', transform: 'translateX(-50%)', background: 'rgba(0,0,0,0.55)', color: 'white', fontFamily: 'var(--sans)', fontSize: 10, letterSpacing: '0.12em', textTransform: 'uppercase', padding: '4px 10px', borderRadius: 999, pointerEvents: 'none' }}>
+                        <div style={{ position: 'absolute', bottom: 8, left: '50%', transform: 'translateX(-50%)', background: 'rgba(0,0,0,0.55)', color: 'white', fontFamily: 'var(--font-sans)', fontSize: 10, letterSpacing: '0.12em', textTransform: 'uppercase', padding: '4px 10px', borderRadius: 999, pointerEvents: 'none' }}>
                           Ziehen zum Ausrichten
                         </div>
                       )}
@@ -502,22 +502,22 @@ export default function CreatePage() {
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: 8 }}>
                       <button type="button"
                         onClick={() => { setVideoFit(f => f === 'contain' ? 'cover' : 'contain'); setVideoObjPos({ x: 50, y: 50 }); }}
-                        style={{ background: 'none', border: '1px solid var(--rule)', borderRadius: 999, fontFamily: 'var(--sans)', fontSize: 11, letterSpacing: '0.1em', textTransform: 'uppercase', color: 'var(--ink-muted)', cursor: 'pointer', padding: '4px 12px' }}>
+                        style={{ background: 'none', border: '1px solid var(--line)', borderRadius: 999, fontFamily: 'var(--font-sans)', fontSize: 11, letterSpacing: '0.1em', textTransform: 'uppercase', color: 'var(--ink-3)', cursor: 'pointer', padding: '4px 12px' }}>
                         {videoFit === 'contain' ? '⊡ Ausfüllen' : '⊞ Anpassen'}
                       </button>
                       <button type="button" onClick={resetVideo}
-                        style={{ background: 'none', border: 'none', fontFamily: 'var(--sans)', fontSize: 12, letterSpacing: '0.12em', textTransform: 'uppercase', color: 'var(--ink-muted)', cursor: 'pointer' }}>
+                        style={{ background: 'none', border: 'none', fontFamily: 'var(--font-sans)', fontSize: 12, letterSpacing: '0.12em', textTransform: 'uppercase', color: 'var(--ink-3)', cursor: 'pointer' }}>
                         Entfernen ×
                       </button>
                     </div>
 
                     {/* Pre-compression status — runs in background after selection */}
                     {(compState === 'preparing' || compState === 'compressing') && (
-                      <div style={{ marginTop: 12, padding: '10px 12px', background: 'rgba(0,0,0,0.03)', borderRadius: 3, border: '1px solid var(--rule)' }}>
+                      <div style={{ marginTop: 12, padding: '10px 12px', background: 'rgba(0,0,0,0.03)', borderRadius: 3, border: '1px solid var(--line)' }}>
                         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 6 }}>
-                          <span style={{ fontFamily: 'var(--sans)', fontSize: 12, color: 'var(--ink-soft)' }}>{compStage}</span>
+                          <span style={{ fontFamily: 'var(--font-sans)', fontSize: 12, color: 'var(--ink-2)' }}>{compStage}</span>
                           {compPct > 0 && compPct < 100 && (
-                            <span style={{ fontFamily: 'var(--sans)', fontSize: 12, fontWeight: 600, color: 'var(--ink)' }}>{compPct} %</span>
+                            <span style={{ fontFamily: 'var(--font-sans)', fontSize: 12, fontWeight: 600, color: 'var(--ink)' }}>{compPct} %</span>
                           )}
                         </div>
                         <div className="progress-bar-wrap">
@@ -527,18 +527,18 @@ export default function CreatePage() {
                             <div className="progress-bar-fill" style={{ width: `${compPct}%` }} />
                           )}
                         </div>
-                        <p style={{ fontFamily: 'var(--sans)', fontSize: 10, color: 'var(--ink-muted)', marginTop: 6, letterSpacing: '0.04em' }}>
+                        <p style={{ fontFamily: 'var(--font-sans)', fontSize: 10, color: 'var(--ink-3)', marginTop: 6, letterSpacing: '0.04em' }}>
                           Das Video wird im Hintergrund vorbereitet — du kannst bereits weitermachen.
                         </p>
                       </div>
                     )}
                     {compState === 'ready' && (
-                      <p style={{ fontFamily: 'var(--sans)', fontSize: 12, color: 'var(--accent)', marginTop: 10, letterSpacing: '0.04em' }}>
+                      <p style={{ fontFamily: 'var(--font-sans)', fontSize: 12, color: 'var(--accent)', marginTop: 10, letterSpacing: '0.04em' }}>
                         {compStage}
                       </p>
                     )}
                     {compState === 'failed' && (
-                      <p style={{ fontFamily: 'var(--sans)', fontSize: 12, color: 'var(--ink-muted)', marginTop: 10, letterSpacing: '0.04em' }}>
+                      <p style={{ fontFamily: 'var(--font-sans)', fontSize: 12, color: 'var(--ink-3)', marginTop: 10, letterSpacing: '0.04em' }}>
                         {compStage}
                       </p>
                     )}
@@ -546,10 +546,10 @@ export default function CreatePage() {
                 ) : (
                   <div className="upload-zone" style={{ marginBottom: 20 }} onClick={() => videoInputRef.current?.click()}>
                     <div style={{ fontSize: 32, marginBottom: 10, opacity: 0.25 }}>▶</div>
-                    <p style={{ fontFamily: 'var(--sans)', fontSize: 15, color: 'var(--ink-soft)', marginBottom: 4 }}>
+                    <p style={{ fontFamily: 'var(--font-sans)', fontSize: 15, color: 'var(--ink-2)', marginBottom: 4 }}>
                       Video auswählen
                     </p>
-                    <p style={{ fontFamily: 'var(--sans)', fontSize: 12, color: 'var(--ink-muted)' }}>
+                    <p style={{ fontFamily: 'var(--font-sans)', fontSize: 12, color: 'var(--ink-3)' }}>
                       MP4, MOV, WebM · max. 200 MB
                     </p>
                     <input ref={videoInputRef} type="file"
@@ -570,11 +570,11 @@ export default function CreatePage() {
             {/* ── Step 3: Image (optional) + Submit ── */}
             {step === 3 && (
               <div className="card">
-                <p className="eyebrow">— 3 / 3 —</p>
+                <p className="eyebrow">3 / 3</p>
                 <h1 className="section-title" style={{ fontSize: 'clamp(22px,5vw,38px)', marginBottom: 8 }}>
-                  Dein <em>Bild</em> <span style={{ fontFamily: 'var(--sans)', fontStyle: 'normal', fontSize: 14, color: 'var(--ink-muted)', letterSpacing: '0.06em', textTransform: 'uppercase' }}>(optional)</span>
+                  Dein <em>Bild</em> <span style={{ fontFamily: 'var(--font-sans)', fontStyle: 'normal', fontSize: 14, color: 'var(--ink-3)', letterSpacing: '0.06em', textTransform: 'uppercase' }}>(optional)</span>
                 </h1>
-                <p style={{ fontFamily: 'var(--sans)', fontSize: 14, color: 'var(--ink-soft)', marginBottom: 16, lineHeight: 1.6 }}>
+                <p style={{ fontFamily: 'var(--font-sans)', fontSize: 14, color: 'var(--ink-2)', marginBottom: 16, lineHeight: 1.6 }}>
                   Wähle ein Vorlagenbild, lade ein eigenes hoch — oder lass es weg, wenn nur dein Video & deine Botschaft zu sehen sein sollen.
                 </p>
 
@@ -583,18 +583,18 @@ export default function CreatePage() {
                   onClick={() => { setImageSource('none'); setSelectedTemplate(''); setImageFile(null); setImagePreview(''); }}
                   style={{
                     display: 'flex', alignItems: 'center', gap: 10, width: '100%',
-                    background: imageSource === 'none' ? 'rgba(110,34,48,0.08)' : 'transparent',
-                    border: `1px solid ${imageSource === 'none' ? 'var(--accent)' : 'var(--rule)'}`,
+                    background: imageSource === 'none' ? 'var(--accent-tint)' : 'transparent',
+                    border: `1px solid ${imageSource === 'none' ? 'var(--accent)' : 'var(--line)'}`,
                     borderRadius: 3, padding: '12px 14px', marginBottom: 18, cursor: 'pointer', textAlign: 'left',
                   }}>
                   <span style={{
                     width: 16, height: 16, borderRadius: '50%',
-                    border: `1.5px solid ${imageSource === 'none' ? 'var(--accent)' : 'var(--rule)'}`,
+                    border: `1.5px solid ${imageSource === 'none' ? 'var(--accent)' : 'var(--line)'}`,
                     display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0,
                   }}>
                     {imageSource === 'none' && <span style={{ width: 8, height: 8, borderRadius: '50%', background: 'var(--accent)' }} />}
                   </span>
-                  <span style={{ fontFamily: 'var(--sans)', fontSize: 13, color: imageSource === 'none' ? 'var(--accent)' : 'var(--ink-soft)', letterSpacing: '0.02em' }}>
+                  <span style={{ fontFamily: 'var(--font-sans)', fontSize: 13, color: imageSource === 'none' ? 'var(--accent)' : 'var(--ink-2)', letterSpacing: '0.02em' }}>
                     Kein Bild anzeigen
                   </span>
                 </button>
@@ -612,9 +612,9 @@ export default function CreatePage() {
                       {/* eslint-disable-next-line @next/next/no-img-element */}
                       <img src={t.url} alt={t.label} style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} />
                       {selectedTemplate === t.id && (
-                        <div style={{ position: 'absolute', inset: 0, background: 'rgba(110,34,48,0.2)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white', fontSize: 18 }}>✓</div>
+                        <div style={{ position: 'absolute', inset: 0, background: 'rgba(77,107,255,0.4)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white', fontSize: 18 }}>✓</div>
                       )}
-                      <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, background: 'linear-gradient(transparent,rgba(0,0,0,0.55))', padding: '6px 6px 4px', fontFamily: 'var(--sans)', fontSize: 9, color: 'white', letterSpacing: '0.1em', textTransform: 'uppercase' }}>
+                      <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, background: 'linear-gradient(transparent,rgba(0,0,0,0.55))', padding: '6px 6px 4px', fontFamily: 'var(--font-sans)', fontSize: 9, color: 'white', letterSpacing: '0.1em', textTransform: 'uppercase' }}>
                         {t.label}
                       </div>
                     </div>
@@ -622,9 +622,9 @@ export default function CreatePage() {
                 </div>
 
                 <div style={{ display: 'flex', alignItems: 'center', gap: 12, margin: '16px 0' }}>
-                  <hr style={{ flex: 1, border: 'none', borderTop: '1px solid var(--rule)' }} />
-                  <span style={{ fontFamily: 'var(--sans)', fontSize: 11, letterSpacing: '0.14em', textTransform: 'uppercase', color: 'var(--ink-muted)' }}>oder</span>
-                  <hr style={{ flex: 1, border: 'none', borderTop: '1px solid var(--rule)' }} />
+                  <hr style={{ flex: 1, border: 'none', borderTop: '1px solid var(--line)' }} />
+                  <span style={{ fontFamily: 'var(--font-sans)', fontSize: 11, letterSpacing: '0.14em', textTransform: 'uppercase', color: 'var(--ink-3)' }}>oder</span>
+                  <hr style={{ flex: 1, border: 'none', borderTop: '1px solid var(--line)' }} />
                 </div>
 
                 {imagePreview ? (
@@ -632,34 +632,34 @@ export default function CreatePage() {
                     {/* eslint-disable-next-line @next/next/no-img-element */}
                     <img src={imagePreview} alt="Vorschau" style={{ width: '100%', borderRadius: 3, maxHeight: 200, objectFit: 'cover', display: 'block' }} />
                     <button type="button" onClick={() => { setImageFile(null); setImagePreview(''); setImageSource('none'); }}
-                      style={{ marginTop: 8, background: 'none', border: 'none', fontFamily: 'var(--sans)', fontSize: 12, letterSpacing: '0.12em', textTransform: 'uppercase', color: 'var(--ink-muted)', cursor: 'pointer' }}>
+                      style={{ marginTop: 8, background: 'none', border: 'none', fontFamily: 'var(--font-sans)', fontSize: 12, letterSpacing: '0.12em', textTransform: 'uppercase', color: 'var(--ink-3)', cursor: 'pointer' }}>
                       Bild entfernen ×
                     </button>
                   </div>
                 ) : (
                   <div className="upload-zone" style={{ marginBottom: 20 }} onClick={() => imageInputRef.current?.click()}>
                     <div style={{ fontSize: 28, marginBottom: 8, opacity: 0.25 }}>🖼</div>
-                    <p style={{ fontFamily: 'var(--sans)', fontSize: 14, color: 'var(--ink-soft)', marginBottom: 4 }}>Eigenes Bild hochladen</p>
-                    <p style={{ fontFamily: 'var(--sans)', fontSize: 12, color: 'var(--ink-muted)' }}>JPG, PNG, WebP · max. 10 MB</p>
+                    <p style={{ fontFamily: 'var(--font-sans)', fontSize: 14, color: 'var(--ink-2)', marginBottom: 4 }}>Eigenes Bild hochladen</p>
+                    <p style={{ fontFamily: 'var(--font-sans)', fontSize: 12, color: 'var(--ink-3)' }}>JPG, PNG, WebP · max. 10 MB</p>
                     <input ref={imageInputRef} type="file" accept="image/jpeg,image/png,image/webp,image/heic"
                       onChange={handleImageChange} style={{ display: 'none' }} />
                   </div>
                 )}
 
                 {error && (
-                  <div style={{ background: 'rgba(110,34,48,0.08)', border: '1px solid rgba(110,34,48,0.2)', padding: '10px 14px', marginBottom: 14, fontFamily: 'var(--sans)', fontSize: 13, color: 'var(--accent)', borderRadius: 2, wordBreak: 'break-word' }}>
+                  <div style={{ background: 'rgba(77,107,255,0.08)', border: '1px solid rgba(77,107,255,0.3)', padding: '10px 14px', marginBottom: 14, fontFamily: 'var(--font-sans)', fontSize: 13, color: 'var(--accent)', borderRadius: 2, wordBreak: 'break-word' }}>
                     {error}
                   </div>
                 )}
 
                 {loading && uploadProgress && (
-                  <div style={{ fontFamily: 'var(--sans)', fontSize: 11, color: 'var(--ink-muted)', marginBottom: 12, textAlign: 'center', letterSpacing: '0.04em' }}>
+                  <div style={{ fontFamily: 'var(--font-sans)', fontSize: 11, color: 'var(--ink-3)', marginBottom: 12, textAlign: 'center', letterSpacing: '0.04em' }}>
                     Bitte Tab geöffnet lassen und Bildschirm aktiv halten
                   </div>
                 )}
 
-                <div style={{ background: 'rgba(110,34,48,0.05)', border: '1px solid rgba(110,34,48,0.12)', padding: '12px 14px', marginBottom: 18, borderRadius: 2 }}>
-                  <p style={{ fontFamily: 'var(--sans)', fontSize: 12, color: 'var(--ink-soft)', lineHeight: 1.55 }}>
+                <div style={{ background: 'rgba(77,107,255,0.05)', border: '1px solid rgba(77,107,255,0.15)', padding: '12px 14px', marginBottom: 18, borderRadius: 2 }}>
+                  <p style={{ fontFamily: 'var(--font-sans)', fontSize: 12, color: 'var(--ink-2)', lineHeight: 1.55 }}>
                     <strong style={{ color: 'var(--accent)' }}>Achtung:</strong> Nach dem Speichern kann der Inhalt nicht mehr geändert werden.
                   </p>
                 </div>
@@ -668,11 +668,11 @@ export default function CreatePage() {
                 {loading && uploadProgress && (
                   <div style={{ marginBottom: 16 }}>
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
-                      <span style={{ fontFamily: 'var(--sans)', fontSize: 12, color: 'var(--ink-muted)', letterSpacing: '0.06em' }}>
+                      <span style={{ fontFamily: 'var(--font-sans)', fontSize: 12, color: 'var(--ink-3)', letterSpacing: '0.06em' }}>
                         {uploadPercent >= 95 && uploadPercent < 100 ? 'Wird abgeschlossen…' : uploadProgress}
                       </span>
                       {uploadPercent > 0 && uploadPercent < 95 && (
-                        <span style={{ fontFamily: 'var(--sans)', fontSize: 13, fontWeight: 600, color: 'var(--ink)' }}>
+                        <span style={{ fontFamily: 'var(--font-sans)', fontSize: 13, fontWeight: 600, color: 'var(--ink)' }}>
                           {uploadPercent} %
                         </span>
                       )}
@@ -685,13 +685,13 @@ export default function CreatePage() {
                       )}
                     </div>
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: 6 }}>
-                      <span style={{ fontFamily: 'var(--sans)', fontSize: 11, color: uploadRetries > 0 ? 'var(--accent)' : 'var(--ink-muted)' }}>
+                      <span style={{ fontFamily: 'var(--font-sans)', fontSize: 11, color: uploadRetries > 0 ? 'var(--accent)' : 'var(--ink-3)' }}>
                         {uploadRetries > 0
                           ? `Verbindung instabil · ${uploadRetries} Wiederholung${uploadRetries === 1 ? '' : 'en'}`
                           : (uploadETA && uploadPercent < 95 ? `noch ca. ${uploadETA}` : ' ')}
                       </span>
                       <button type="button" onClick={cancelUpload}
-                        style={{ background: 'none', border: 'none', fontFamily: 'var(--sans)', fontSize: 11, letterSpacing: '0.1em', textTransform: 'uppercase', color: 'var(--ink-muted)', cursor: 'pointer', padding: 0 }}>
+                        style={{ background: 'none', border: 'none', fontFamily: 'var(--font-sans)', fontSize: 11, letterSpacing: '0.1em', textTransform: 'uppercase', color: 'var(--ink-3)', cursor: 'pointer', padding: 0 }}>
                         Abbrechen ×
                       </button>
                     </div>

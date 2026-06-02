@@ -68,20 +68,20 @@ export default function VerifyPage() {
           {/* Steps */}
           <div style={{ display: 'flex', alignItems: 'center', marginBottom: 40 }}>
             <StepDot num={1} label="E-Mail" active={step === 'email'} done={step === 'code'} />
-            <div style={{ flex: 1, height: 1, background: 'var(--rule)', margin: '0 12px' }} />
+            <div style={{ flex: 1, height: 1, background: 'var(--line)', margin: '0 12px' }} />
             <StepDot num={2} label="Code" active={step === 'code'} done={false} />
-            <div style={{ flex: 1, height: 1, background: 'var(--rule)', margin: '0 12px' }} />
+            <div style={{ flex: 1, height: 1, background: 'var(--line)', margin: '0 12px' }} />
             <StepDot num={3} label="Botschaft" active={false} done={false} />
           </div>
 
           <div className="card">
             {step === 'email' ? (
               <form onSubmit={sendCode}>
-                <p className="eyebrow">— Schritt 1 von 2 —</p>
+                <p className="eyebrow">Schritt 1 von 2</p>
                 <h1 className="section-title" style={{ marginBottom: 12 }}>
                   Deine <em>E-Mail</em>
                 </h1>
-                <p style={{ fontFamily: 'var(--sans)', fontSize: 15, color: 'var(--ink-soft)', lineHeight: 1.65, marginBottom: 28 }}>
+                <p style={{ fontFamily: 'var(--font-sans)', fontSize: 15, color: 'var(--ink-2)', lineHeight: 1.65, marginBottom: 28 }}>
                   Gib deine E-Mail-Adresse ein. Wir senden dir einen Verifizierungscode —
                   damit dein Name für immer mit dieser Flasche verbunden ist.
                 </p>
@@ -107,17 +107,17 @@ export default function VerifyPage() {
               </form>
             ) : (
               <form onSubmit={confirmCode}>
-                <p className="eyebrow">— Schritt 2 von 2 —</p>
+                <p className="eyebrow">Schritt 2 von 2</p>
                 <h1 className="section-title" style={{ marginBottom: 12 }}>
                   Code <em>eingeben</em>
                 </h1>
                 {demoCode ? (
-                  <div style={{ background: 'rgba(91,94,62,0.08)', border: '1px solid rgba(91,94,62,0.25)', padding: '12px 16px', marginBottom: 24, borderRadius: 2 }}>
-                    <p style={{ fontFamily: 'var(--sans)', fontSize: 12, letterSpacing: '0.12em', textTransform: 'uppercase', color: 'var(--olive)', marginBottom: 6 }}>Demo-Modus — kein E-Mail-Versand konfiguriert</p>
-                    <p style={{ fontFamily: 'var(--sans)', fontSize: 14, color: 'var(--ink-soft)' }}>Dein Code wurde automatisch eingetragen:</p>
+                  <div style={{ background: 'var(--accent-tint)', border: '1px solid rgba(77,107,255,0.3)', padding: '12px 16px', marginBottom: 24, borderRadius: 2 }}>
+                    <p style={{ fontFamily: 'var(--font-sans)', fontSize: 12, letterSpacing: '0.12em', textTransform: 'uppercase', color: 'var(--accent-strong)', marginBottom: 6 }}>Demo-Modus — kein E-Mail-Versand konfiguriert</p>
+                    <p style={{ fontFamily: 'var(--font-sans)', fontSize: 14, color: 'var(--ink-2)' }}>Dein Code wurde automatisch eingetragen:</p>
                   </div>
                 ) : (
-                  <p style={{ fontFamily: 'var(--sans)', fontSize: 15, color: 'var(--ink-soft)', lineHeight: 1.65, marginBottom: 28 }}>
+                  <p style={{ fontFamily: 'var(--font-sans)', fontSize: 15, color: 'var(--ink-2)', lineHeight: 1.65, marginBottom: 28 }}>
                     Wir haben einen 6-stelligen Code an <strong style={{ color: 'var(--ink)' }}>{email}</strong> gesendet.
                     Gültig für 15 Minuten.
                   </p>
@@ -148,7 +148,7 @@ export default function VerifyPage() {
                 <button
                   type="button"
                   onClick={() => { setStep('email'); setVerifyCode(''); setError(''); }}
-                  style={{ marginTop: 12, background: 'none', border: 'none', width: '100%', textAlign: 'center', fontFamily: 'var(--sans)', fontSize: 12, letterSpacing: '0.12em', textTransform: 'uppercase', color: 'var(--ink-muted)', cursor: 'pointer' }}
+                  style={{ marginTop: 12, background: 'none', border: 'none', width: '100%', textAlign: 'center', fontFamily: 'var(--font-sans)', fontSize: 12, letterSpacing: '0.12em', textTransform: 'uppercase', color: 'var(--ink-3)', cursor: 'pointer' }}
                 >
                   Andere E-Mail verwenden
                 </button>
@@ -168,14 +168,14 @@ function StepDot({ num, label, active, done }: { num: number; label: string; act
       <div style={{
         width: 30, height: 30, borderRadius: '50%',
         background: done ? 'var(--accent)' : active ? 'var(--ink)' : 'transparent',
-        border: `1.5px solid ${done ? 'var(--accent)' : active ? 'var(--ink)' : 'var(--rule)'}`,
-        color: done || active ? 'var(--bg)' : 'var(--ink-muted)',
+        border: `1.5px solid ${done ? 'var(--accent)' : active ? 'var(--ink)' : 'var(--line)'}`,
+        color: done || active ? 'var(--paper)' : 'var(--ink-3)',
         display: 'flex', alignItems: 'center', justifyContent: 'center',
-        fontFamily: 'var(--serif)', fontSize: 14,
+        fontFamily: 'var(--font-serif)', fontSize: 14,
       }}>
         {done ? '✓' : num}
       </div>
-      <span style={{ fontFamily: 'var(--sans)', fontSize: 10, letterSpacing: '0.14em', textTransform: 'uppercase', color: active ? 'var(--ink)' : 'var(--ink-muted)' }}>
+      <span style={{ fontFamily: 'var(--font-sans)', fontSize: 10, letterSpacing: '0.14em', textTransform: 'uppercase', color: active ? 'var(--ink)' : 'var(--ink-3)' }}>
         {label}
       </span>
     </div>
@@ -184,7 +184,7 @@ function StepDot({ num, label, active, done }: { num: number; label: string; act
 
 function ErrorBox({ msg }: { msg: string }) {
   return (
-    <div style={{ background: 'rgba(110,34,48,0.08)', border: '1px solid rgba(110,34,48,0.2)', padding: '12px 16px', marginBottom: 16, fontFamily: 'var(--sans)', fontSize: 14, color: 'var(--accent)', borderRadius: 2 }}>
+    <div style={{ background: 'rgba(77,107,255,0.08)', border: '1px solid rgba(77,107,255,0.3)', padding: '12px 16px', marginBottom: 16, fontFamily: 'var(--font-sans)', fontSize: 14, color: 'var(--accent)', borderRadius: 2 }}>
       {msg}
     </div>
   );

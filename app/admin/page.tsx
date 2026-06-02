@@ -35,9 +35,9 @@ export default function AdminLoginPage() {
       <main style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '64px 20px' }}>
         <div style={{ width: '100%', maxWidth: 400 }}>
           <div className="card">
-            <p className="eyebrow">— Admin —</p>
+            <p className="eyebrow">Admin</p>
             <h1 className="section-title" style={{ marginBottom: 8 }}>Anmeldung</h1>
-            <p style={{ fontFamily: 'var(--sans)', fontSize: 14, color: 'var(--ink-soft)', marginBottom: 28, lineHeight: 1.65 }}>
+            <p style={{ fontFamily: 'var(--font-sans)', fontSize: 14, color: 'var(--ink-2)', marginBottom: 28, lineHeight: 1.65 }}>
               Gib das Admin-Passwort ein, um auf die Verwaltungskonsole zuzugreifen.
             </p>
             <form onSubmit={handleLogin}>
@@ -54,7 +54,7 @@ export default function AdminLoginPage() {
                 />
               </div>
               {error && (
-                <div style={{ background: 'rgba(110,34,48,0.08)', border: '1px solid rgba(110,34,48,0.2)', padding: '10px 14px', marginBottom: 16, fontFamily: 'var(--sans)', fontSize: 13, color: 'var(--accent)', borderRadius: 2 }}>
+                <div style={{ background: 'rgba(77,107,255,0.08)', border: '1px solid rgba(77,107,255,0.3)', padding: '10px 14px', marginBottom: 16, fontFamily: 'var(--font-sans)', fontSize: 13, color: 'var(--accent)', borderRadius: 2 }}>
                   {error}
                 </div>
               )}

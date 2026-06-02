@@ -29,7 +29,7 @@ type QRCode = {
 function ContentDetail({ qr }: { qr: QRCode }) {
   if (!qr.content_id) {
     return (
-      <p style={{ fontFamily: 'var(--sans)', fontSize: 13, color: 'var(--ink-muted)', padding: '12px 0' }}>
+      <p style={{ fontFamily: 'var(--font-sans)', fontSize: 13, color: 'var(--ink-3)', padding: '12px 0' }}>
         Noch kein Inhalt hinterlegt.
       </p>
     );
@@ -38,23 +38,23 @@ function ContentDetail({ qr }: { qr: QRCode }) {
   return (
     <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 1fr) auto', gap: 24, padding: '14px 0 4px', alignItems: 'start' }}>
       <div style={{ minWidth: 0 }}>
-        <p className="eyebrow" style={{ marginBottom: 4 }}>— Persönliche Botschaft —</p>
+        <p className="eyebrow" style={{ marginBottom: 4 }}>Persönliche Botschaft</p>
         {qr.sender_name && (
-          <p style={{ fontFamily: 'var(--serif)', fontStyle: 'italic', fontSize: 15, color: 'var(--ink)', marginBottom: 8 }}>
+          <p style={{ fontFamily: 'var(--font-serif)', fontStyle: 'italic', fontSize: 15, color: 'var(--ink)', marginBottom: 8 }}>
             von {qr.sender_name}
           </p>
         )}
         {qr.message ? (
-          <blockquote style={{ fontFamily: 'var(--serif)', fontStyle: 'italic', fontSize: 14, lineHeight: 1.6, color: 'var(--ink)', borderLeft: '2px solid var(--accent)', paddingLeft: 12, margin: 0, whiteSpace: 'pre-wrap', wordBreak: 'break-word' }}>
+          <blockquote style={{ fontFamily: 'var(--font-serif)', fontStyle: 'italic', fontSize: 14, lineHeight: 1.6, color: 'var(--ink)', borderLeft: '2px solid var(--accent)', paddingLeft: 12, margin: 0, whiteSpace: 'pre-wrap', wordBreak: 'break-word' }}>
             {qr.message}
           </blockquote>
         ) : (
-          <p style={{ fontFamily: 'var(--sans)', fontSize: 13, color: 'var(--ink-muted)' }}>
+          <p style={{ fontFamily: 'var(--font-sans)', fontSize: 13, color: 'var(--ink-3)' }}>
             (keine Botschaft)
           </p>
         )}
         {submittedAt && (
-          <p style={{ fontFamily: 'var(--sans)', fontSize: 11, color: 'var(--ink-muted)', marginTop: 10, letterSpacing: '0.05em' }}>
+          <p style={{ fontFamily: 'var(--font-sans)', fontSize: 11, color: 'var(--ink-3)', marginTop: 10, letterSpacing: '0.05em' }}>
             Eingereicht am {submittedAt}
           </p>
         )}
@@ -62,7 +62,7 @@ function ContentDetail({ qr }: { qr: QRCode }) {
       <div style={{ display: 'flex', flexDirection: 'column', gap: 12, width: 200 }}>
         {qr.video_url ? (
           <div>
-            <p className="eyebrow" style={{ marginBottom: 4 }}>— Video —</p>
+            <p className="eyebrow" style={{ marginBottom: 4 }}>Video</p>
             <video
               src={qr.video_url}
               controls
@@ -73,24 +73,24 @@ function ContentDetail({ qr }: { qr: QRCode }) {
                 objectPosition: `${qr.video_obj_x ?? 50}% ${qr.video_obj_y ?? 50}%`,
               }}
             />
-            <a href={qr.video_url} target="_blank" rel="noopener noreferrer" style={{ display: 'block', marginTop: 4, fontFamily: 'var(--sans)', fontSize: 10, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'var(--ink-muted)' }}>
+            <a href={qr.video_url} target="_blank" rel="noopener noreferrer" style={{ display: 'block', marginTop: 4, fontFamily: 'var(--font-sans)', fontSize: 10, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'var(--ink-3)' }}>
               Original öffnen ↗
             </a>
           </div>
         ) : (
-          <p style={{ fontFamily: 'var(--sans)', fontSize: 12, color: 'var(--ink-muted)' }}>Kein Video</p>
+          <p style={{ fontFamily: 'var(--font-sans)', fontSize: 12, color: 'var(--ink-3)' }}>Kein Video</p>
         )}
         {qr.image_url ? (
           <div>
-            <p className="eyebrow" style={{ marginBottom: 4 }}>— Bild —</p>
+            <p className="eyebrow" style={{ marginBottom: 4 }}>Bild</p>
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img src={qr.image_url} alt="Bild zur Botschaft" style={{ width: '100%', borderRadius: 3, display: 'block' }} />
-            <a href={qr.image_url} target="_blank" rel="noopener noreferrer" style={{ display: 'block', marginTop: 4, fontFamily: 'var(--sans)', fontSize: 10, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'var(--ink-muted)' }}>
+            <a href={qr.image_url} target="_blank" rel="noopener noreferrer" style={{ display: 'block', marginTop: 4, fontFamily: 'var(--font-sans)', fontSize: 10, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'var(--ink-3)' }}>
               Original öffnen ↗
             </a>
           </div>
         ) : (
-          <p style={{ fontFamily: 'var(--sans)', fontSize: 12, color: 'var(--ink-muted)' }}>Kein Bild</p>
+          <p style={{ fontFamily: 'var(--font-sans)', fontSize: 12, color: 'var(--ink-3)' }}>Kein Bild</p>
         )}
       </div>
     </div>
@@ -222,7 +222,7 @@ export default function AdminDashboard() {
           {/* Header */}
           <div style={{ display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between', gap: 24, marginBottom: 40, flexWrap: 'wrap' }}>
             <div>
-              <p className="eyebrow">— Verwaltung —</p>
+              <p className="eyebrow">Verwaltung</p>
               <h1 className="section-title">Admin <em>Konsole</em></h1>
             </div>
             <button
@@ -230,14 +230,14 @@ export default function AdminDashboard() {
                 await fetch('/api/admin/login', { method: 'DELETE' });
                 router.push('/admin');
               }}
-              style={{ background: 'none', border: 'none', fontFamily: 'var(--sans)', fontSize: 12, letterSpacing: '0.12em', textTransform: 'uppercase', color: 'var(--ink-muted)', cursor: 'pointer' }}
+              style={{ background: 'none', border: 'none', fontFamily: 'var(--font-sans)', fontSize: 12, letterSpacing: '0.12em', textTransform: 'uppercase', color: 'var(--ink-3)', cursor: 'pointer' }}
             >
               Abmelden
             </button>
           </div>
 
           {/* Tab navigation */}
-          <div style={{ display: 'flex', gap: 0, borderBottom: '1px solid var(--rule)', marginBottom: 32, overflowX: 'auto' }}>
+          <div style={{ display: 'flex', gap: 0, borderBottom: '1px solid var(--line)', marginBottom: 32, overflowX: 'auto' }}>
             {([
               { id: 'qr', label: 'QR-Codes' },
               { id: 'submissions', label: 'E-Mail-Einreichungen' },
@@ -246,8 +246,8 @@ export default function AdminDashboard() {
               <button key={t.id} type="button" onClick={() => setActiveTab(t.id)}
                 style={{
                   background: 'none', border: 'none', padding: '12px 18px', cursor: 'pointer',
-                  fontFamily: 'var(--sans)', fontSize: 12, letterSpacing: '0.12em', textTransform: 'uppercase',
-                  color: activeTab === t.id ? 'var(--ink)' : 'var(--ink-muted)',
+                  fontFamily: 'var(--font-sans)', fontSize: 12, letterSpacing: '0.12em', textTransform: 'uppercase',
+                  color: activeTab === t.id ? 'var(--ink)' : 'var(--ink-3)',
                   borderBottom: `2px solid ${activeTab === t.id ? 'var(--accent)' : 'transparent'}`,
                   marginBottom: -1, whiteSpace: 'nowrap',
                 }}>
@@ -268,16 +268,16 @@ export default function AdminDashboard() {
               { label: 'Gesperrt', value: stats.locked, badge: 'badge-locked' },
             ].map((s, i) => (
               <div key={i} className="card card-sm" style={{ textAlign: 'center' }}>
-                <div style={{ fontFamily: 'var(--serif)', fontSize: 'clamp(28px,3vw,40px)', fontWeight: 500, color: 'var(--ink)' }}>{s.value}</div>
-                <div style={{ fontFamily: 'var(--sans)', fontSize: 11, letterSpacing: '0.14em', textTransform: 'uppercase', color: 'var(--ink-muted)', marginTop: 4 }}>{s.label}</div>
+                <div style={{ fontFamily: 'var(--font-serif)', fontSize: 'clamp(28px,3vw,40px)', fontWeight: 500, color: 'var(--ink)' }}>{s.value}</div>
+                <div style={{ fontFamily: 'var(--font-sans)', fontSize: 11, letterSpacing: '0.14em', textTransform: 'uppercase', color: 'var(--ink-3)', marginTop: 4 }}>{s.label}</div>
               </div>
             ))}
           </div>
 
           {/* Create QR codes */}
           <div className="card" style={{ marginBottom: 32 }}>
-            <p className="eyebrow">— Neue QR-Codes —</p>
-            <h2 style={{ fontFamily: 'var(--serif)', fontSize: 24, fontWeight: 500, marginBottom: 20 }}>QR-Codes erstellen</h2>
+            <p className="eyebrow">Neue QR-Codes</p>
+            <h2 style={{ fontFamily: 'var(--font-serif)', fontSize: 24, fontWeight: 500, marginBottom: 20 }}>QR-Codes erstellen</h2>
             <div style={{ display: 'flex', gap: 16, alignItems: 'flex-end', flexWrap: 'wrap' }}>
               <div>
                 <label className="input-label" htmlFor="count">Anzahl</label>
@@ -311,9 +311,9 @@ export default function AdminDashboard() {
 
           {/* QR Code list */}
           <div className="card" style={{ padding: 0, overflow: 'hidden' }}>
-            <div style={{ padding: '20px 24px', borderBottom: '1px solid var(--rule)', display: 'flex', alignItems: 'center', gap: 16, flexWrap: 'wrap' }}>
-              <h2 style={{ fontFamily: 'var(--serif)', fontSize: 22, fontWeight: 500, flex: 1 }}>
-                Alle QR-Codes <span style={{ fontFamily: 'var(--sans)', fontSize: 14, color: 'var(--ink-muted)', fontWeight: 400 }}>({filteredCodes.length})</span>
+            <div style={{ padding: '20px 24px', borderBottom: '1px solid var(--line)', display: 'flex', alignItems: 'center', gap: 16, flexWrap: 'wrap' }}>
+              <h2 style={{ fontFamily: 'var(--font-serif)', fontSize: 22, fontWeight: 500, flex: 1 }}>
+                Alle QR-Codes <span style={{ fontFamily: 'var(--font-sans)', fontSize: 14, color: 'var(--ink-3)', fontWeight: 400 }}>({filteredCodes.length})</span>
               </h2>
               <input
                 type="text"
@@ -329,7 +329,7 @@ export default function AdminDashboard() {
             </div>
 
             {loading ? (
-              <div style={{ padding: 48, textAlign: 'center', fontFamily: 'var(--sans)', fontSize: 14, color: 'var(--ink-muted)' }}>
+              <div style={{ padding: 48, textAlign: 'center', fontFamily: 'var(--font-sans)', fontSize: 14, color: 'var(--ink-3)' }}>
                 Lade Codes…
               </div>
             ) : filteredCodes.length === 0 ? (
@@ -357,15 +357,15 @@ export default function AdminDashboard() {
                               onClick={() => hasContent && setExpandedCode(isExpanded ? null : qr.code)}
                               style={{ cursor: hasContent ? 'pointer' : 'default', background: isExpanded ? 'rgba(0,0,0,0.025)' : undefined }}
                             >
-                              <td style={{ fontSize: 14, color: 'var(--ink-muted)', textAlign: 'center', userSelect: 'none' }}>
+                              <td style={{ fontSize: 14, color: 'var(--ink-3)', textAlign: 'center', userSelect: 'none' }}>
                                 {hasContent ? (isExpanded ? '▾' : '▸') : ''}
                               </td>
-                              <td><a href={`${baseUrl}/q/${qr.code}`} target="_blank" rel="noopener noreferrer" onClick={e => e.stopPropagation()} style={{ fontFamily: 'var(--sans)', fontWeight: 600, letterSpacing: '0.08em', color: 'var(--ink)', fontSize: 13 }}>{qr.code}</a></td>
+                              <td><a href={`${baseUrl}/q/${qr.code}`} target="_blank" rel="noopener noreferrer" onClick={e => e.stopPropagation()} style={{ fontFamily: 'var(--font-sans)', fontWeight: 600, letterSpacing: '0.08em', color: 'var(--ink)', fontSize: 13 }}>{qr.code}</a></td>
                               <td><span className={`badge badge-${qr.status}`}>{qr.status}</span></td>
                               <td style={{ fontSize: 13, maxWidth: 160, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{qr.admin_note || <span style={{ opacity: 0.4 }}>—</span>}</td>
                               <td style={{ fontSize: 13 }}>{qr.sender_name || <span style={{ opacity: 0.4 }}>—</span>}</td>
-                              <td style={{ fontSize: 12, color: 'var(--ink-muted)' }}>{qr.email || <span style={{ opacity: 0.4 }}>—</span>}</td>
-                              <td style={{ fontSize: 12, color: 'var(--ink-muted)', whiteSpace: 'nowrap' }}>{new Date(qr.created_at).toLocaleDateString('de-CH')}</td>
+                              <td style={{ fontSize: 12, color: 'var(--ink-3)' }}>{qr.email || <span style={{ opacity: 0.4 }}>—</span>}</td>
+                              <td style={{ fontSize: 12, color: 'var(--ink-3)', whiteSpace: 'nowrap' }}>{new Date(qr.created_at).toLocaleDateString('de-CH')}</td>
                               <td onClick={e => e.stopPropagation()}><div style={{ display: 'flex', gap: 6, justifyContent: 'flex-end' }}>
                                 <button className="btn btn-ghost btn-sm" onClick={() => downloadQR(qr.code)}>SVG</button>
                                 <Link href={`/q/${qr.code}/view`} className="btn btn-ghost btn-sm" target="_blank">Ansicht</Link>
@@ -392,7 +392,7 @@ export default function AdminDashboard() {
                     const isExpanded = expandedCode === qr.code;
                     const hasContent = qr.status === 'locked' && (qr.message || qr.video_url || qr.image_url);
                     return (
-                      <div key={qr.id} style={{ padding: '16px 20px', borderBottom: '1px solid var(--rule)' }}>
+                      <div key={qr.id} style={{ padding: '16px 20px', borderBottom: '1px solid var(--line)' }}>
                         <div
                           onClick={() => hasContent && setExpandedCode(isExpanded ? null : qr.code)}
                           style={{ cursor: hasContent ? 'pointer' : 'default' }}
@@ -400,17 +400,17 @@ export default function AdminDashboard() {
                           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12, marginBottom: 8 }}>
                             <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
                               {hasContent && (
-                                <span style={{ fontSize: 12, color: 'var(--ink-muted)' }}>{isExpanded ? '▾' : '▸'}</span>
+                                <span style={{ fontSize: 12, color: 'var(--ink-3)' }}>{isExpanded ? '▾' : '▸'}</span>
                               )}
                               <a href={`${baseUrl}/q/${qr.code}`} target="_blank" rel="noopener noreferrer" onClick={e => e.stopPropagation()}
-                                style={{ fontFamily: 'var(--sans)', fontWeight: 600, fontSize: 14, letterSpacing: '0.08em', color: 'var(--ink)' }}>
+                                style={{ fontFamily: 'var(--font-sans)', fontWeight: 600, fontSize: 14, letterSpacing: '0.08em', color: 'var(--ink)' }}>
                                 {qr.code}
                               </a>
                             </div>
                             <span className={`badge badge-${qr.status}`}>{qr.status}</span>
                           </div>
                           {(qr.admin_note || qr.sender_name || qr.email) && (
-                            <div style={{ fontFamily: 'var(--sans)', fontSize: 12, color: 'var(--ink-muted)', marginBottom: 10, lineHeight: 1.5 }}>
+                            <div style={{ fontFamily: 'var(--font-sans)', fontSize: 12, color: 'var(--ink-3)', marginBottom: 10, lineHeight: 1.5 }}>
                               {qr.admin_note && <div>{qr.admin_note}</div>}
                               {qr.sender_name && <div>{qr.sender_name} · {qr.email}</div>}
                             </div>
@@ -423,7 +423,7 @@ export default function AdminDashboard() {
                           <button className="btn btn-danger btn-sm" onClick={() => deleteQR(qr.code)}>Löschen</button>
                         </div>
                         {isExpanded && hasContent && (
-                          <div style={{ marginTop: 14, paddingTop: 14, borderTop: '1px dashed var(--rule)' }}>
+                          <div style={{ marginTop: 14, paddingTop: 14, borderTop: '1px dashed var(--line)' }}>
                             <ContentDetail qr={qr} />
                           </div>
                         )}
@@ -441,8 +441,8 @@ export default function AdminDashboard() {
       {toast && (
         <div style={{
           position: 'fixed', bottom: 24, right: 24,
-          background: 'var(--ink)', color: 'var(--bg)',
-          fontFamily: 'var(--sans)', fontSize: 13,
+          background: 'var(--ink)', color: 'var(--paper)',
+          fontFamily: 'var(--font-sans)', fontSize: 13,
           padding: '12px 18px', borderRadius: 2,
           boxShadow: '0 8px 24px rgba(0,0,0,0.2)',
           zIndex: 999,

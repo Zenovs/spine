@@ -86,16 +86,16 @@ export function ContentView({ showToast }: { showToast: Toast }) {
               textAlign: 'center', cursor: 'pointer', background: filter === s.key ? 'rgba(110,34,48,0.05)' : undefined,
               borderColor: filter === s.key ? 'var(--accent)' : undefined,
             }}>
-            <div style={{ fontFamily: 'var(--serif)', fontSize: 'clamp(28px,3vw,40px)', fontWeight: 500, color: 'var(--ink)' }}>{s.value}</div>
-            <div style={{ fontFamily: 'var(--sans)', fontSize: 11, letterSpacing: '0.14em', textTransform: 'uppercase', color: 'var(--ink-muted)', marginTop: 4 }}>{s.label}</div>
+            <div style={{ fontFamily: 'var(--font-serif)', fontSize: 'clamp(28px,3vw,40px)', fontWeight: 500, color: 'var(--ink)' }}>{s.value}</div>
+            <div style={{ fontFamily: 'var(--font-sans)', fontSize: 11, letterSpacing: '0.14em', textTransform: 'uppercase', color: 'var(--ink-3)', marginTop: 4 }}>{s.label}</div>
           </button>
         ))}
       </div>
 
       <div className="card" style={{ padding: 0, overflow: 'hidden' }}>
-        <div style={{ padding: '20px 24px', borderBottom: '1px solid var(--rule)', display: 'flex', alignItems: 'center', gap: 12, flexWrap: 'wrap' }}>
-          <h2 style={{ fontFamily: 'var(--serif)', fontSize: 22, fontWeight: 500, flex: 1 }}>
-            Alle Inhalte <span style={{ fontFamily: 'var(--sans)', fontSize: 14, color: 'var(--ink-muted)', fontWeight: 400 }}>({filtered.length})</span>
+        <div style={{ padding: '20px 24px', borderBottom: '1px solid var(--line)', display: 'flex', alignItems: 'center', gap: 12, flexWrap: 'wrap' }}>
+          <h2 style={{ fontFamily: 'var(--font-serif)', fontSize: 22, fontWeight: 500, flex: 1 }}>
+            Alle Inhalte <span style={{ fontFamily: 'var(--font-sans)', fontSize: 14, color: 'var(--ink-3)', fontWeight: 400 }}>({filtered.length})</span>
           </h2>
           <input
             type="text"
@@ -108,7 +108,7 @@ export function ContentView({ showToast }: { showToast: Toast }) {
         </div>
 
         {loading ? (
-          <div style={{ padding: 48, textAlign: 'center', fontFamily: 'var(--sans)', fontSize: 14, color: 'var(--ink-muted)' }}>
+          <div style={{ padding: 48, textAlign: 'center', fontFamily: 'var(--font-sans)', fontSize: 14, color: 'var(--ink-3)' }}>
             Lade Inhalte…
           </div>
         ) : filtered.length === 0 ? (
@@ -120,17 +120,17 @@ export function ContentView({ showToast }: { showToast: Toast }) {
         ) : (
           <div style={{ display: 'flex', flexDirection: 'column' }}>
             {filtered.map(r => (
-              <div key={r.content_id} style={{ padding: '20px 24px', borderBottom: '1px solid var(--rule)' }}>
+              <div key={r.content_id} style={{ padding: '20px 24px', borderBottom: '1px solid var(--line)' }}>
                 {/* Header row: code, status, actions */}
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 12, marginBottom: 14, flexWrap: 'wrap' }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap' }}>
                     {r.qr_code ? (
                       <a href={`/q/${r.qr_code}/view`} target="_blank" rel="noopener noreferrer"
-                        style={{ fontFamily: 'var(--sans)', fontWeight: 600, fontSize: 13, letterSpacing: '0.08em', color: 'var(--ink)' }}>
+                        style={{ fontFamily: 'var(--font-sans)', fontWeight: 600, fontSize: 13, letterSpacing: '0.08em', color: 'var(--ink)' }}>
                         {r.qr_code}
                       </a>
                     ) : (
-                      <span style={{ fontFamily: 'var(--sans)', fontSize: 13, color: 'var(--ink-muted)', fontStyle: 'italic' }}>
+                      <span style={{ fontFamily: 'var(--font-sans)', fontSize: 13, color: 'var(--ink-3)', fontStyle: 'italic' }}>
                         (kein QR)
                       </span>
                     )}
@@ -139,7 +139,7 @@ export function ContentView({ showToast }: { showToast: Toast }) {
                     ) : (
                       <span className={`badge badge-${r.qr_status || 'pending'}`}>{r.qr_status}</span>
                     )}
-                    <span style={{ fontFamily: 'var(--sans)', fontSize: 12, color: 'var(--ink-muted)' }}>
+                    <span style={{ fontFamily: 'var(--font-sans)', fontSize: 12, color: 'var(--ink-3)' }}>
                       {new Date(r.content_created_at).toLocaleString('de-CH')}
                     </span>
                   </div>
@@ -160,7 +160,7 @@ export function ContentView({ showToast }: { showToast: Toast }) {
                 </div>
 
                 {/* Meta: email + sender */}
-                <div style={{ fontFamily: 'var(--sans)', fontSize: 13, color: 'var(--ink-soft)', marginBottom: 12 }}>
+                <div style={{ fontFamily: 'var(--font-sans)', fontSize: 13, color: 'var(--ink-2)', marginBottom: 12 }}>
                   {r.email && <span>{r.email}</span>}
                   {r.sender_name && <span> · von {r.sender_name}</span>}
                 </div>
@@ -169,17 +169,17 @@ export function ContentView({ showToast }: { showToast: Toast }) {
                 <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 1fr) auto', gap: 20, alignItems: 'start' }}>
                   <div style={{ minWidth: 0 }}>
                     {r.message ? (
-                      <blockquote style={{ fontFamily: 'var(--serif)', fontStyle: 'italic', fontSize: 14, lineHeight: 1.6, color: 'var(--ink)', borderLeft: '2px solid var(--accent)', paddingLeft: 12, margin: 0, whiteSpace: 'pre-wrap', wordBreak: 'break-word' }}>
+                      <blockquote style={{ fontFamily: 'var(--font-serif)', fontStyle: 'italic', fontSize: 14, lineHeight: 1.6, color: 'var(--ink)', borderLeft: '2px solid var(--accent)', paddingLeft: 12, margin: 0, whiteSpace: 'pre-wrap', wordBreak: 'break-word' }}>
                         {r.message}
                       </blockquote>
                     ) : (
-                      <p style={{ fontFamily: 'var(--sans)', fontSize: 13, color: 'var(--ink-muted)', fontStyle: 'italic' }}>(keine Botschaft)</p>
+                      <p style={{ fontFamily: 'var(--font-sans)', fontSize: 13, color: 'var(--ink-3)', fontStyle: 'italic' }}>(keine Botschaft)</p>
                     )}
                   </div>
                   <div style={{ display: 'flex', flexDirection: 'column', gap: 10, width: 180 }}>
                     {r.video_url && (
                       <div>
-                        <p className="eyebrow" style={{ marginBottom: 4 }}>— Video —</p>
+                        <p className="eyebrow" style={{ marginBottom: 4 }}>Video</p>
                         <video
                           src={r.video_url}
                           controls
@@ -194,13 +194,13 @@ export function ContentView({ showToast }: { showToast: Toast }) {
                     )}
                     {r.image_url && (
                       <div>
-                        <p className="eyebrow" style={{ marginBottom: 4 }}>— Bild —</p>
+                        <p className="eyebrow" style={{ marginBottom: 4 }}>Bild</p>
                         {/* eslint-disable-next-line @next/next/no-img-element */}
                         <img src={r.image_url} alt="Bild" style={{ width: '100%', borderRadius: 3, display: 'block' }} />
                       </div>
                     )}
                     {!r.video_url && !r.image_url && (
-                      <p style={{ fontFamily: 'var(--sans)', fontSize: 12, color: 'var(--ink-muted)' }}>Keine Medien</p>
+                      <p style={{ fontFamily: 'var(--font-sans)', fontSize: 12, color: 'var(--ink-3)' }}>Keine Medien</p>
                     )}
                   </div>
                 </div>
