@@ -48,7 +48,7 @@ export function SiteHeader({ showAdmin = false }: { showAdmin?: boolean }) {
               Admin
             </Link>
           )}
-          <Link href="#how" className="btn btn--primary btn-sm">
+          <Link href="https://www.augmentedreality.ch/admin" className="btn btn--primary btn-sm">
             Demo starten <ArrowRight size={12} />
           </Link>
         </nav>

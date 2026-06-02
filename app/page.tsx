@@ -80,8 +80,8 @@ function HeroParticles() {
       pts = Array.from({ length: count }, () => ({
         x: Math.random() * w,
         y: Math.random() * h,
-        vx: (Math.random() - 0.5) * 0.5,
-        vy: (Math.random() - 0.5) * 0.5,
+        vx: (Math.random() - 0.5) * 1.0,
+        vy: (Math.random() - 0.5) * 1.0,
       }));
     }
 
@@ -93,7 +93,7 @@ function HeroParticles() {
       ctx.clearRect(0, 0, w, h);
 
       // advance
-      const MAX_SPEED = 0.8;
+      const MAX_SPEED = 1.4;
       for (const p of pts) {
         p.x += p.vx;
         p.y += p.vy;
@@ -108,17 +108,18 @@ function HeroParticles() {
           const dy = pointer.y - p.y;
           const d = Math.hypot(dx, dy);
           if (d < POINTER_DIST) {
-            const f = (1 - d / POINTER_DIST) * 0.04;
+            const f = (1 - d / POINTER_DIST) * 0.05;
             p.vx += (dx / (d || 1)) * f;
             p.vy += (dy / (d || 1)) * f;
           }
         }
 
-        // Brownian drift + mild damping — keeps the constellation
-        // perpetually alive when the pointer isn't moving, while still
-        // letting pointer attraction perturb it temporarily.
-        p.vx = p.vx * 0.992 + (Math.random() - 0.5) * 0.012;
-        p.vy = p.vy * 0.992 + (Math.random() - 0.5) * 0.012;
+        // Brownian drift + very light damping — strong enough to keep the
+        // network in perpetual motion (steady-state ~0.5–0.7 px/frame, i.e.
+        // 30–40 px/sec at 60fps), while still letting pointer attraction
+        // perturb it temporarily before re-settling.
+        p.vx = p.vx * 0.997 + (Math.random() - 0.5) * 0.05;
+        p.vy = p.vy * 0.997 + (Math.random() - 0.5) * 0.05;
 
         // cap to prevent runaway acceleration after pointer attraction
         const sp = Math.hypot(p.vx, p.vy);
@@ -234,11 +235,11 @@ export default function Home() {
                 </h1>
               </div>
               <p className="hero__sub" data-reveal data-reveal-delay="2">
-                Verbinde physische Produkte mit digitalen Erlebnissen. Ein QR-Code — unendliche
-                Möglichkeiten: Video, AR-Overlays, 3D-Inhalte und persönliche Botschaften.
+                Ein QR-Code auf dem Produkt — ein digitales Erlebnis dahinter.
+                Video, AR-Layer, 3D-Modell oder persönliche Botschaft. Du entscheidest.
               </p>
               <div className="hero__actions" data-reveal data-reveal-delay="3">
-                <a href="#how" className="btn btn--primary">Demo starten <ArrowRight size={14} /></a>
+                <a href="https://www.augmentedreality.ch/admin" className="btn btn--primary">Demo starten <ArrowRight size={14} /></a>
                 <a href="#ar" className="btn btn--ghost">AR entdecken</a>
               </div>
               <div className="hero__meta" data-reveal data-reveal-delay="4">
@@ -268,19 +269,19 @@ export default function Home() {
                   num: '01',
                   verb: 'Scan',
                   title: 'QR-Code scannen',
-                  body: 'Der QR-Code befindet sich bereits auf dem Produkt. Einfach scannen — beim ersten Mal gelangt man zur Eingabe der persönlichen Botschaft.',
+                  body: 'Mit der Smartphone-Kamera erfassen. Kein App-Download, keine Anmeldung — direkt im Browser.',
                 },
                 {
                   num: '02',
                   verb: 'Fill',
                   title: 'Inhalt hinterlegen',
-                  body: 'Video hochladen, Grussworte verfassen, Bild wählen — oder direkt ein AR-Erlebnis konfigurieren. Einmalig, für immer gespeichert.',
+                  body: 'Video, persönliche Botschaft, Bild oder AR-Layer. Einmal gesetzt, fest mit dem Produkt verknüpft.',
                 },
                 {
                   num: '03',
                   verb: 'Feel',
                   title: 'Erlebnis empfangen',
-                  body: 'Jeder weitere Scan zeigt das Erlebnis direkt: Video, AR-Overlay, 3D-Modell. Unveränderlich mit dem Produkt verbunden.',
+                  body: 'Jeder weitere Scan öffnet den Inhalt sofort. Persönlich, dauerhaft, ohne Umweg.',
                 },
               ].map((step, i) => (
                 <div key={i} className="step" data-reveal data-reveal-delay={String(i + 2) as '2' | '3' | '4'}>
@@ -303,7 +304,7 @@ export default function Home() {
               <span className="eyebrow">Produkte</span>
               <h2 className="h2">Für jeden <em>Anlass.</em></h2>
               <p className="lead" style={{ maxWidth: 480, margin: '16px auto 0' }}>
-                Verbinde jedes physische Produkt mit einer digitalen Erlebniswelt.
+                Jedes Produkt wird Träger einer Geschichte — vom Hochzeitswein bis zur Erbstücks-Uhr.
               </p>
             </div>
             <div className="cats-grid">
@@ -349,23 +350,23 @@ export default function Home() {
                 <ul className="ar__list" data-reveal data-reveal-delay="2">
                   <li>
                     <span className="tick"><Checkmark size={14} /></span>
-                    Kein App-Download — direkt im Browser
+                    WebAR direkt im Browser — ohne Download
                   </li>
                   <li>
                     <span className="tick"><Checkmark size={14} /></span>
-                    3D-Modelle und Animationen auf jedem Gerät
+                    3D-Modelle und Animationen auf jedem Smartphone
                   </li>
                   <li>
                     <span className="tick"><Checkmark size={14} /></span>
-                    Videobotschaften mit AR-Overlay überlagern
+                    Video und Botschaft mit AR-Layer kombinieren
                   </li>
                   <li>
                     <span className="tick"><Checkmark size={14} /></span>
-                    Produktdemos in Echtzeit-3D
+                    Produktdetails in Echtzeit-3D zeigen
                   </li>
                 </ul>
                 <div className="ar__note" data-reveal data-reveal-delay="3">
-                  &ldquo;Physisch und digital verschmelzen zu einem einzigen, unvergesslichen Erlebnis.&rdquo;
+                  &ldquo;Physisch und digital — ein einziges Erlebnis.&rdquo;
                 </div>
               </div>
 
@@ -465,15 +466,14 @@ export default function Home() {
                 <span className="eyebrow">Dauerhaftigkeit</span>
                 <h2 className="h2">Einmal gespeichert.<br /><em>Für immer.</em></h2>
                 <p className="lead" style={{ maxWidth: 480, margin: '16px auto 0' }}>
-                  Jede Botschaft ist unveränderlich mit dem physischen Objekt verknüpft.
-                  Kein Login, keine App — nur scannen.
+                  Inhalt einmal eingerichtet, unveränderlich mit dem Produkt verknüpft. Kein Login, keine App.
                 </p>
               </div>
               <div className="permanence__row">
                 {[
-                  { label: 'Unveränderlich', desc: 'Nach dem Sperren kann kein Inhalt überschrieben werden.' },
+                  { label: 'Unveränderlich', desc: 'Nach dem Sperren bleibt der Inhalt fix — kein Überschreiben.' },
                   { label: 'App-frei', desc: 'Funktioniert auf jedem Smartphone, direkt im Browser.' },
-                  { label: 'Für immer', desc: 'Hosted auf redundanter Infrastruktur — kein Ablaufdatum.' },
+                  { label: 'Für immer', desc: 'Redundant gehostet — kein Ablaufdatum, kein Abo.' },
                 ].map((cell, i) => (
                   <div key={i} className="permanence__cell" data-reveal data-reveal-delay={String(i + 2) as '2' | '3' | '4'}>
                     <div style={{ fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: '1rem', textTransform: 'uppercase', color: 'var(--ink)', letterSpacing: '-0.01em' }}>
@@ -503,12 +503,12 @@ export default function Home() {
               <div data-reveal>
                 <span className="eyebrow">Jetzt starten</span>
                 <h2 className="h2">Hinterlasse etwas<br /><em>Bleibendes.</em></h2>
-                <p className="lead" style={{ maxWidth: 420, margin: '16px auto 0' }}>
-                  Der QR-Code ist bereits auf dem Produkt. Scanne ihn und starte dein persönliches Erlebnis.
+                <p className="lead" style={{ maxWidth: 460, margin: '16px auto 0' }}>
+                  Wir kleben den QR-Code aufs Produkt — du füllst ihn mit deinem Inhalt. Einmal eingerichtet, dauerhaft verbunden.
                 </p>
               </div>
               <div className="closing__actions" data-reveal data-reveal-delay="2">
-                <a href="#how" className="btn btn--primary">Demo starten <ArrowRight size={14} /></a>
+                <a href="https://www.augmentedreality.ch/admin" className="btn btn--primary">Demo starten <ArrowRight size={14} /></a>
                 <a href="mailto:info@augmentedreality.ch" className="btn btn--ghost">Kontakt aufnehmen</a>
               </div>
             </div>

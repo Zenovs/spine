@@ -1351,5 +1351,36 @@ hr.rule { border: none; border-top: 1px solid var(--line); margin: 0; }
   .upload-zone { padding: 20px 16px; }
   .admin-table th, .admin-table td { padding: 10px 12px; font-size: 0.75rem; }
   .lock-banner { font-size: 0.62rem; padding: 8px 16px; }
-  .hero__actions { flex-direction: column; align-items: flex-start; }
+
+  /* Hero on mobile: smaller min-height, centered button column, tighter mask */
+  .hero { min-height: 56vh; padding: clamp(24px, 6vw, 40px) 0 clamp(40px, 8vw, 64px); }
+  .hero--center .hero__actions { flex-direction: column; align-items: stretch; width: 100%; max-width: 320px; margin-left: auto; margin-right: auto; }
+  .hero--center .hero__actions .btn { width: 100%; }
+  .hero--center .hero__meta { gap: 8px; font-size: 0.66rem; }
+  .hero-particles {
+    -webkit-mask-image: radial-gradient(ellipse 80% 95% at 50% 50%, black 60%, transparent 100%);
+    mask-image: radial-gradient(ellipse 80% 95% at 50% 50%, black 60%, transparent 100%);
+  }
+
+  /* Step verb scales down so all three cards stack readably */
+  .step__verb { font-size: clamp(1.6rem, 2rem + 4vw, 2.2rem); }
+  .step { padding: 20px 18px; }
+
+  /* AR phone visualization — clip overflow and shrink chips */
+  .phone-wrap { transform: scale(0.78); transform-origin: center; }
+  .ar-chip { font-size: 0.55rem !important; padding: 4px 8px !important; }
+
+  /* Slow down the body ambient drift on small devices to save battery */
+  body::after { animation-duration: 45s; }
+
+  /* Spinning rings on AR section run slower on mobile */
+  .phone-wrap [style*="spinC1"] { animation-duration: 24s !important; }
+  .phone-wrap [style*="spinC2"] { animation-duration: 32s !important; }
+}
+
+@media (max-width: 420px) {
+  /* Very narrow screens — category grid down to 2 columns for breathing room */
+  .cats-grid { gap: 8px; }
+  .cat { padding: 16px 12px; }
+  .cat__name { font-size: 13px; }
 }
