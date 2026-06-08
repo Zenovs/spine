@@ -1,7 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import "./globals.css";
 
-const SITE_URL = "https://www.augmentedreality.ch";
+const SITE_URL = "https://spine-orpin.vercel.app";
 
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),

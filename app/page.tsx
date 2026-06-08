@@ -239,7 +239,7 @@ export default function Home() {
                 Video, AR-Layer, 3D-Modell oder persönliche Botschaft. Du entscheidest.
               </p>
               <div className="hero__actions" data-reveal data-reveal-delay="3">
-                <a href="https://www.augmentedreality.ch/admin" className="btn btn--primary">Demo starten <ArrowRight size={14} /></a>
+                <a href="/admin" className="btn btn--primary">Demo starten <ArrowRight size={14} /></a>
                 <a href="#ar" className="btn btn--ghost">AR entdecken</a>
               </div>
               <div className="hero__meta" data-reveal data-reveal-delay="4">
@@ -504,7 +504,7 @@ export default function Home() {
                 </p>
               </div>
               <div className="closing__actions" data-reveal data-reveal-delay="2">
-                <a href="https://www.augmentedreality.ch/admin" className="btn btn--primary">Demo starten <ArrowRight size={14} /></a>
+                <a href="/admin" className="btn btn--primary">Demo starten <ArrowRight size={14} /></a>
                 <a href="mailto:info@wireon.ch" className="btn btn--ghost">Kontakt aufnehmen</a>
               </div>
             </div>

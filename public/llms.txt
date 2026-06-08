@@ -45,7 +45,7 @@ Drei Schritte: Scan it. Fill it. Feel it.
 
 augmentedreality.ch wird von wireon (Schweiz) betrieben.
 
-- Website: https://www.augmentedreality.ch
+- Website: https://spine-orpin.vercel.app
 - Kontakt: info@wireon.ch
 - Anbieter: https://wireon.ch
 
@@ -55,8 +55,8 @@ Die Plattform und alle Inhalte sind auf Deutsch (Schweiz).
 
 ## Wichtige URLs
 
-- Start: https://www.augmentedreality.ch
-- Admin (nur für Anbieter): https://www.augmentedreality.ch/admin
+- Start: https://spine-orpin.vercel.app
+- Admin (nur für Anbieter): https://spine-orpin.vercel.app/admin
 - Demo / Setup-Flow startet ebenfalls unter /admin
 
 QR-Code-spezifische URLs (`/q/{code}`) sind nicht crawl-bar — sie enthalten personalisierte Inhalte einzelner Käufer.
