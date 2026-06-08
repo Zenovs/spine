@@ -1,6 +1,7 @@
 'use client';
 import { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
+import { useT } from '@/lib/i18n-client';
 
 type Submission = {
   content_id: string;
@@ -22,6 +23,7 @@ type Submission = {
 
 export function SubmissionsView() {
   const router = useRouter();
+  const t = useT();
   const [rows, setRows] = useState<Submission[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
@@ -54,9 +56,9 @@ export function SubmissionsView() {
       {/* Stats */}
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 12, marginBottom: 32 }}>
         {[
-          { label: 'Einreichungen', value: rows.length },
-          { label: 'Eindeutige E-Mails', value: uniqueEmails },
-          { label: 'QR-Code gelöscht', value: rows.filter(r => r.qr_deleted).length },
+          { label: t('subs.stats.total'), value: rows.length },
+          { label: t('subs.stats.unique'), value: uniqueEmails },
+          { label: t('subs.stats.orphan'), value: rows.filter(r => r.qr_deleted).length },
         ].map((s, i) => (
           <div key={i} className="card card-sm" style={{ textAlign: 'center' }}>
             <div style={{ fontFamily: 'var(--font-display)', fontSize: 'clamp(28px,3vw,40px)', fontWeight: 700, color: 'var(--ink)', letterSpacing: '-0.015em' }}>{s.value}</div>
@@ -68,32 +70,32 @@ export function SubmissionsView() {
       <div className="card" style={{ padding: 0, overflow: 'hidden' }}>
         <div style={{ padding: '20px 24px', borderBottom: '1px solid var(--line)', display: 'flex', alignItems: 'center', gap: 12, flexWrap: 'wrap' }}>
           <h2 style={{ fontFamily: 'var(--font-display)', fontSize: 20, fontWeight: 700, letterSpacing: '-0.01em', flex: 1 }}>
-            E-Mail-Einreichungen <span style={{ fontFamily: 'var(--font-sans)', fontSize: 14, color: 'var(--ink-3)', fontWeight: 400 }}>({filtered.length})</span>
+            {t('subs.title')} <span style={{ fontFamily: 'var(--font-sans)', fontSize: 14, color: 'var(--ink-3)', fontWeight: 400 }}>({filtered.length})</span>
           </h2>
           <input
             type="text"
             className="input-field"
-            placeholder="Suchen…"
+            placeholder={t('common.search')}
             value={search}
             onChange={e => setSearch(e.target.value)}
             style={{ width: 200, padding: '8px 12px', fontSize: 13 }}
           />
           <a className="btn btn-ghost btn-sm" href="/api/admin/submissions/export?format=csv" download>
-            CSV ↓
+            {t('subs.csv')}
           </a>
           <a className="btn btn-ghost btn-sm" href="/api/admin/submissions/export?format=xlsx" download>
-            XLSX ↓
+            {t('subs.xlsx')}
           </a>
         </div>
 
         {loading ? (
           <div style={{ padding: 48, textAlign: 'center', fontFamily: 'var(--font-sans)', fontSize: 14, color: 'var(--ink-3)' }}>
-            Lade Einreichungen…
+            {t('subs.loading')}
           </div>
         ) : filtered.length === 0 ? (
           <div style={{ padding: 48, textAlign: 'center' }}>
             <p className="lede" style={{ textAlign: 'center' }}>
-              {rows.length === 0 ? 'Noch keine Einreichungen.' : 'Keine Treffer.'}
+              {rows.length === 0 ? t('subs.empty') : t('subs.noMatch')}
             </p>
           </div>
         ) : (
@@ -103,7 +105,7 @@ export function SubmissionsView() {
               <table className="admin-table">
                 <thead>
                   <tr>
-                    <th>E-Mail</th><th>Absender</th><th>QR-Code</th><th>QR-Status</th><th>Datum</th>
+                    <th>{t('subs.col.email')}</th><th>{t('subs.col.sender')}</th><th>{t('subs.col.qr')}</th><th>{t('subs.col.status')}</th><th>{t('subs.col.date')}</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -120,7 +122,7 @@ export function SubmissionsView() {
                       </td>
                       <td>
                         {r.qr_deleted
-                          ? <span className="badge badge-deleted" style={{ fontSize: 10 }}>QR gelöscht</span>
+                          ? <span className="badge badge-deleted" style={{ fontSize: 10 }}>{t('subs.qrDeleted')}</span>
                           : <span className={`badge badge-${r.qr_status || 'pending'}`} style={{ fontSize: 10 }}>{r.qr_status || '—'}</span>}
                       </td>
                       <td style={{ fontSize: 12, color: 'var(--ink-3)', whiteSpace: 'nowrap' }}>
@@ -150,7 +152,7 @@ export function SubmissionsView() {
                       </div>
                     </div>
                     {r.qr_deleted
-                      ? <span className="badge badge-deleted" style={{ fontSize: 9 }}>QR gelöscht</span>
+                      ? <span className="badge badge-deleted" style={{ fontSize: 9 }}>{t('subs.qrDeleted')}</span>
                       : <span className={`badge badge-${r.qr_status || 'pending'}`} style={{ fontSize: 9 }}>{r.qr_status || '—'}</span>}
                   </div>
                 </div>

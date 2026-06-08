@@ -3,11 +3,15 @@ import { getQRCode, getContent } from '@/lib/db';
 import { SiteHeader, SiteFooter } from '@/components/SiteHeader';
 import { VideoPlayerClient } from './VideoPlayerClient';
 import { Locked } from '@carbon/icons-react';
+import { getLocale } from '@/lib/i18n-server';
+import { t } from '@/lib/i18n';
 
 export default async function ViewPage({ params }: { params: Promise<{ code: string }> }) {
   const { code } = await params;
   const qr = await getQRCode(code);
   if (!qr) return notFound();
+  const locale = await getLocale();
+  const tr = (k: string, v?: Record<string, string | number>) => t(locale, k, v);
 
   let content = null;
   let senderName = '';
@@ -45,7 +49,7 @@ export default async function ViewPage({ params }: { params: Promise<{ code: str
       {/* Lock banner */}
       <div className="lock-banner">
         <Locked size={14} />
-        {isLocked ? 'Dieser Inhalt ist dauerhaft gespeichert und kann nicht mehr geändert werden.' : 'Standard-Inhalt · Noch keine persönliche Botschaft hinterlegt.'}
+        {isLocked ? tr('view.banner.locked') : tr('view.banner.pending')}
       </div>
 
       <main style={{ flex: 1, paddingTop: 'clamp(84px,7vw,120px)', paddingBottom: 'clamp(20px,4vw,56px)', paddingLeft: 16, paddingRight: 16 }}>
@@ -53,14 +57,14 @@ export default async function ViewPage({ params }: { params: Promise<{ code: str
 
           {/* Header */}
           <div style={{ textAlign: 'center', marginBottom: 40 }}>
-            <p className="eyebrow" style={{ textAlign: 'center' }}>Persönliche Botschaft</p>
+            <p className="eyebrow" style={{ textAlign: 'center' }}>{tr('view.header.eyebrow')}</p>
             {senderName ? (
               <h1 className="display" style={{ textAlign: 'center' }}>
-                Von <em>{senderName}</em>
+                {tr('view.header.from')} <em>{senderName}</em>
               </h1>
             ) : (
               <h1 className="display" style={{ textAlign: 'center' }}>
-                Eine <em>besondere</em> Flasche
+                {tr('view.header.placeholderPre')} <em>{tr('view.header.placeholderEm')}</em> {tr('view.header.placeholderPost')}
               </h1>
             )}
           </div>
@@ -87,7 +91,7 @@ export default async function ViewPage({ params }: { params: Promise<{ code: str
                   {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img
                     src={imageUrl}
-                    alt="Bild zur Botschaft"
+                    alt={tr('view.image.alt')}
                     style={{ width: '100%', maxHeight: 400, objectFit: 'cover', display: 'block' }}
                   />
                 </div>
@@ -96,7 +100,7 @@ export default async function ViewPage({ params }: { params: Promise<{ code: str
               {/* Message */}
               {message && (
                 <div className="card">
-                  <p className="eyebrow">Grussworte</p>
+                  <p className="eyebrow">{tr('view.message.eyebrow')}</p>
                   <blockquote style={{
                     fontFamily: 'var(--font-serif)',
                     fontStyle: 'italic',
@@ -126,22 +130,22 @@ export default async function ViewPage({ params }: { params: Promise<{ code: str
             <div className="card" style={{ textAlign: 'center', padding: 'clamp(40px,6vw,64px)' }}>
               <div style={{ fontFamily: 'var(--font-serif)', fontStyle: 'italic', fontSize: 48, color: 'var(--line)', marginBottom: 20 }}>◇</div>
               <p className="lede" style={{ textAlign: 'center' }}>
-                Dieser QR-Code hat noch keinen Inhalt. Scan nach dem Aufkleben auf die Flasche.
+                {tr('view.empty')}
               </p>
             </div>
           )}
           {/* CTA — always shown */}
           <div style={{ marginTop: 48, borderTop: '1px solid var(--line)', paddingTop: 36, textAlign: 'center' }}>
-            <p className="eyebrow" style={{ textAlign: 'center' }}>Mehr entdecken</p>
+            <p className="eyebrow" style={{ textAlign: 'center' }}>{tr('view.cta.eyebrow')}</p>
             <p style={{ fontFamily: 'var(--font-serif)', fontStyle: 'italic', fontSize: 'clamp(15px,1.6vw,18px)', color: 'var(--ink-2)', marginBottom: 24, lineHeight: 1.6 }}>
-              Entdecke unsere Weine und bestelle direkt online.
+              {tr('view.cta.sub')}
             </p>
             <div style={{ display: 'flex', gap: 12, justifyContent: 'center', flexWrap: 'wrap' }}>
               <a href="https://beispiel.ch" target="_blank" rel="noopener noreferrer" className="btn btn-primary">
-                Zur Website
+                {tr('view.cta.website')}
               </a>
               <a href="https://shop.beispiel.ch" target="_blank" rel="noopener noreferrer" className="btn btn-ghost">
-                Zum Shop
+                {tr('view.cta.shop')}
               </a>
             </div>
           </div>

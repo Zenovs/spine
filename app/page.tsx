@@ -1,6 +1,7 @@
 'use client';
 import { useEffect, useRef } from 'react';
 import { SiteHeader, SiteFooter } from '@/components/SiteHeader';
+import { useT } from '@/lib/i18n-client';
 import {
   QrCode,
   AugmentedReality,
@@ -215,6 +216,7 @@ function HeroParticles() {
 /* ─── Main page ─── */
 export default function Home() {
   useReveal();
+  const t = useT();
 
   return (
     <>
@@ -229,25 +231,24 @@ export default function Home() {
           <div className="container">
             <div className="hero__inner">
               <div className="hero__top" data-reveal>
-                <span className="eyebrow eyebrow--solo">QR · AR · Mixed Reality</span>
+                <span className="eyebrow eyebrow--solo">{t('hero.eyebrow')}</span>
                 <h1 className="display">
-                  Jedes Produkt erzählt deine <em>Geschichte.</em>
+                  {t('hero.headlinePre')} <em>{t('hero.headlineEm')}</em>
                 </h1>
               </div>
               <p className="hero__sub" data-reveal data-reveal-delay="2">
-                Ein QR-Code auf dem Produkt — ein digitales Erlebnis dahinter.
-                Video, AR-Layer, 3D-Modell oder persönliche Botschaft. Du entscheidest.
+                {t('hero.sub')}
               </p>
               <div className="hero__actions" data-reveal data-reveal-delay="3">
-                <a href="/admin" className="btn btn--primary">Demo starten <ArrowRight size={14} /></a>
-                <a href="#ar" className="btn btn--ghost">AR entdecken</a>
+                <a href="/admin" className="btn btn--primary">{t('hero.cta.demo')} <ArrowRight size={14} /></a>
+                <a href="#ar" className="btn btn--ghost">{t('hero.cta.ar')}</a>
               </div>
               <div className="hero__meta" data-reveal data-reveal-delay="4">
                 <span className="tag"><QrCode size={14} /> QR</span>
                 <span className="sep" />
                 <span className="tag"><AugmentedReality size={14} /> AR</span>
                 <span className="sep" />
-                <span className="tag"><Cube size={14} /> Mixed Reality</span>
+                <span className="tag"><Cube size={14} /> {t('hero.tag.mixed')}</span>
               </div>
             </div>
           </div>
@@ -259,30 +260,15 @@ export default function Home() {
         <section id="how" className="section section--light">
           <div className="container">
             <div className="section-head" data-reveal>
-              <span className="eyebrow">So funktioniert es</span>
-              <h2 className="h2">Drei Schritte.<br /><em>Ein Erlebnis.</em></h2>
+              <span className="eyebrow">{t('steps.eyebrow')}</span>
+              <h2 className="h2">{t('steps.titlePre')}<br /><em>{t('steps.titleEm')}</em></h2>
             </div>
 
             <div className="steps">
               {[
-                {
-                  num: '01',
-                  verb: 'Scan',
-                  title: 'QR-Code scannen',
-                  body: 'Mit der Smartphone-Kamera erfassen. Kein App-Download, keine Anmeldung — direkt im Browser.',
-                },
-                {
-                  num: '02',
-                  verb: 'Fill',
-                  title: 'Inhalt hinterlegen',
-                  body: 'Video, persönliche Botschaft, Bild oder AR-Layer. Einmal gesetzt, fest mit dem Produkt verknüpft.',
-                },
-                {
-                  num: '03',
-                  verb: 'Feel',
-                  title: 'Erlebnis empfangen',
-                  body: 'Jeder weitere Scan öffnet den Inhalt sofort. Persönlich, dauerhaft, ohne Umweg.',
-                },
+                { num: '01', verb: t('steps.01.verb'), title: t('steps.01.title'), body: t('steps.01.body') },
+                { num: '02', verb: t('steps.02.verb'), title: t('steps.02.title'), body: t('steps.02.body') },
+                { num: '03', verb: t('steps.03.verb'), title: t('steps.03.title'), body: t('steps.03.body') },
               ].map((step, i) => (
                 <div key={i} className="step" data-reveal data-reveal-delay={String(i + 2) as '2' | '3' | '4'}>
                   <span className="step__num">{step.num}</span>
@@ -301,23 +287,23 @@ export default function Home() {
         <section id="cats" className="section">
           <div className="container">
             <div className="cats-head" data-reveal>
-              <span className="eyebrow">Produkte</span>
-              <h2 className="h2">Für jeden <em>Anlass.</em></h2>
+              <span className="eyebrow">{t('cats.eyebrow')}</span>
+              <h2 className="h2">{t('cats.titlePre')} <em>{t('cats.titleEm')}</em></h2>
               <p className="lead" style={{ maxWidth: 480, margin: '16px auto 0' }}>
-                Jedes Produkt wird Träger einer Geschichte — vom Hochzeitswein bis zur Erbstücks-Uhr.
+                {t('cats.lead')}
               </p>
             </div>
             <div className="cats-grid">
               {[
-                { Icon: BottlesIcon,    name: 'Wein & Spirituosen' },
-                { Icon: Gift,           name: 'Geschenkartikel' },
-                { Icon: Watch,          name: 'Schmuck & Uhren' },
-                { Icon: Package,        name: 'Verpackungen' },
-                { Icon: PaintBrush,     name: 'Kunstobjekte' },
-                { Icon: Tree,           name: 'Naturprodukte' },
-                { Icon: HomeIcon,       name: 'Immobilien' },
-                { Icon: Book,           name: 'Bücher & Medien' },
-                { Icon: DiamondOutline, name: 'Luxusgüter' },
+                { Icon: BottlesIcon,    name: t('cats.wine') },
+                { Icon: Gift,           name: t('cats.gift') },
+                { Icon: Watch,          name: t('cats.jewelry') },
+                { Icon: Package,        name: t('cats.packaging') },
+                { Icon: PaintBrush,     name: t('cats.art') },
+                { Icon: Tree,           name: t('cats.nature') },
+                { Icon: HomeIcon,       name: t('cats.realestate') },
+                { Icon: Book,           name: t('cats.books') },
+                { Icon: DiamondOutline, name: t('cats.luxury') },
               ].map((cat, i) => (
                 <div key={i} className="cat" data-reveal data-reveal-delay={String((i % 3) + 2) as '2' | '3' | '4'}>
                   <div className="cat__icon" aria-hidden="true">
@@ -339,31 +325,19 @@ export default function Home() {
               {/* Copy column */}
               <div className="ar__copy">
                 <div data-reveal>
-                  <span className="eyebrow">AR & Mixed Reality</span>
-                  <h2 className="h2">Die Zukunft<br />in <em>deinen Händen.</em></h2>
+                  <span className="eyebrow">{t('ar.eyebrow')}</span>
+                  <h2 className="h2">{t('ar.titlePre')}<br /><em>{t('ar.titleEm')}</em></h2>
                 </div>
                 <div className="ar__tags" data-reveal data-reveal-delay="2">
-                  <span className="pill">WebAR</span>
-                  <span className="pill">3D-Overlays</span>
-                  <span className="pill">Mixed Reality</span>
+                  <span className="pill">{t('ar.pills.webar')}</span>
+                  <span className="pill">{t('ar.pills.3d')}</span>
+                  <span className="pill">{t('ar.pills.mixed')}</span>
                 </div>
                 <ul className="ar__list" data-reveal data-reveal-delay="2">
-                  <li>
-                    <span className="tick"><Checkmark size={14} /></span>
-                    WebAR direkt im Browser — ohne Download
-                  </li>
-                  <li>
-                    <span className="tick"><Checkmark size={14} /></span>
-                    3D-Modelle und Animationen auf jedem Smartphone
-                  </li>
-                  <li>
-                    <span className="tick"><Checkmark size={14} /></span>
-                    Video und Botschaft mit AR-Layer kombinieren
-                  </li>
-                  <li>
-                    <span className="tick"><Checkmark size={14} /></span>
-                    Produktdetails in Echtzeit-3D zeigen
-                  </li>
+                  <li><span className="tick"><Checkmark size={14} /></span>{t('ar.list.1')}</li>
+                  <li><span className="tick"><Checkmark size={14} /></span>{t('ar.list.2')}</li>
+                  <li><span className="tick"><Checkmark size={14} /></span>{t('ar.list.3')}</li>
+                  <li><span className="tick"><Checkmark size={14} /></span>{t('ar.list.4')}</li>
                 </ul>
               </div>
 
@@ -426,7 +400,7 @@ export default function Home() {
                     {/* Bottom scrim — minimal AR status indicator only */}
                     <div style={{ position: 'absolute', bottom: 20, left: 14, right: 14 }}>
                       <div style={{ fontFamily: 'var(--font-mono)', fontSize: '0.6rem', letterSpacing: '0.1em', textTransform: 'uppercase', color: 'rgba(124,146,255,0.8)' }}>
-                        AR aktiv
+                        {t('ar.phone.label')}
                       </div>
                     </div>
                   </div>
@@ -436,13 +410,13 @@ export default function Home() {
                     as if they were AR UI elements rendered on top of the
                     camera view, not labels next to it. */}
                 <div className="ar-chip" style={{ top: '14%', right: '8%', animation: 'floatA 4s ease-in-out infinite' }}>
-                  Videobotschaft
+                  {t('ar.chip.video')}
                 </div>
                 <div className="ar-chip" style={{ top: '46%', left: '14%', animation: 'floatB 5s ease-in-out infinite', animationDelay: '0.8s' }}>
-                  Grussworte
+                  {t('ar.chip.message')}
                 </div>
                 <div className="ar-chip" style={{ bottom: '20%', right: '12%', animation: 'floatA 4.5s ease-in-out infinite', animationDelay: '1.6s' }}>
-                  3D-Element
+                  {t('ar.chip.3d')}
                 </div>
               </div>
             </div>
@@ -459,17 +433,17 @@ export default function Home() {
                 <div className="seal">
                   <Star size={28} />
                 </div>
-                <span className="eyebrow">Dauerhaftigkeit</span>
-                <h2 className="h2">Einmal gespeichert.<br /><em>Für immer.</em></h2>
+                <span className="eyebrow">{t('perm.eyebrow')}</span>
+                <h2 className="h2">{t('perm.titlePre')}<br /><em>{t('perm.titleEm')}</em></h2>
                 <p className="lead" style={{ maxWidth: 480, margin: '16px auto 0' }}>
-                  Inhalt einmal eingerichtet, unveränderlich mit dem Produkt verknüpft. Kein Login, keine App.
+                  {t('perm.lead')}
                 </p>
               </div>
               <div className="permanence__row">
                 {[
-                  { label: 'Unveränderlich', desc: 'Nach dem Sperren bleibt der Inhalt fix — kein Überschreiben.' },
-                  { label: 'App-frei', desc: 'Funktioniert auf jedem Smartphone, direkt im Browser.' },
-                  { label: 'Für immer', desc: 'Redundant gehostet — kein Ablaufdatum, kein Abo.' },
+                  { label: t('perm.cell1.label'), desc: t('perm.cell1.desc') },
+                  { label: t('perm.cell2.label'), desc: t('perm.cell2.desc') },
+                  { label: t('perm.cell3.label'), desc: t('perm.cell3.desc') },
                 ].map((cell, i) => (
                   <div key={i} className="permanence__cell" data-reveal data-reveal-delay={String(i + 2) as '2' | '3' | '4'}>
                     <div style={{ fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: '1rem', textTransform: 'uppercase', color: 'var(--ink)', letterSpacing: '-0.01em' }}>
@@ -497,15 +471,15 @@ export default function Home() {
                 borderRadius: '50%', pointerEvents: 'none',
               }} />
               <div data-reveal>
-                <span className="eyebrow">Jetzt starten</span>
-                <h2 className="h2">Hinterlasse etwas<br /><em>Bleibendes.</em></h2>
+                <span className="eyebrow">{t('closing.eyebrow')}</span>
+                <h2 className="h2">{t('closing.titlePre')}<br /><em>{t('closing.titleEm')}</em></h2>
                 <p className="lead" style={{ maxWidth: 460, margin: '16px auto 0' }}>
-                  Wir kleben den QR-Code aufs Produkt — du füllst ihn mit deinem Inhalt. Einmal eingerichtet, dauerhaft verbunden.
+                  {t('closing.lead')}
                 </p>
               </div>
               <div className="closing__actions" data-reveal data-reveal-delay="2">
-                <a href="/admin" className="btn btn--primary">Demo starten <ArrowRight size={14} /></a>
-                <a href="mailto:info@wireon.ch" className="btn btn--ghost">Kontakt aufnehmen</a>
+                <a href="/admin" className="btn btn--primary">{t('hero.cta.demo')} <ArrowRight size={14} /></a>
+                <a href="mailto:info@wireon.ch" className="btn btn--ghost">{t('closing.cta.contact')}</a>
               </div>
             </div>
           </div>

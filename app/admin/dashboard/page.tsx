@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { SiteHeader, SiteFooter } from '@/components/SiteHeader';
 import { SubmissionsView } from './SubmissionsView';
 import { ContentView } from './ContentView';
+import { useT } from '@/lib/i18n-client';
 
 type Tab = 'qr' | 'submissions' | 'content';
 
@@ -27,10 +28,11 @@ type QRCode = {
 };
 
 function ContentDetail({ qr }: { qr: QRCode }) {
+  const t = useT();
   if (!qr.content_id) {
     return (
       <p style={{ fontFamily: 'var(--font-sans)', fontSize: 13, color: 'var(--ink-3)', padding: '12px 0' }}>
-        Noch kein Inhalt hinterlegt.
+        {t('adminDash.detail.empty')}
       </p>
     );
   }
@@ -38,10 +40,10 @@ function ContentDetail({ qr }: { qr: QRCode }) {
   return (
     <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 1fr) auto', gap: 24, padding: '14px 0 4px', alignItems: 'start' }}>
       <div style={{ minWidth: 0 }}>
-        <p className="eyebrow" style={{ marginBottom: 4 }}>Persönliche Botschaft</p>
+        <p className="eyebrow" style={{ marginBottom: 4 }}>{t('adminDash.detail.personalMessage')}</p>
         {qr.sender_name && (
           <p style={{ fontFamily: 'var(--font-serif)', fontStyle: 'italic', fontSize: 15, color: 'var(--ink)', marginBottom: 8 }}>
-            von {qr.sender_name}
+            {t('adminDash.detail.from', { name: qr.sender_name })}
           </p>
         )}
         {qr.message ? (
@@ -50,19 +52,19 @@ function ContentDetail({ qr }: { qr: QRCode }) {
           </blockquote>
         ) : (
           <p style={{ fontFamily: 'var(--font-sans)', fontSize: 13, color: 'var(--ink-3)' }}>
-            (keine Botschaft)
+            {t('adminDash.detail.noMessage')}
           </p>
         )}
         {submittedAt && (
           <p style={{ fontFamily: 'var(--font-sans)', fontSize: 11, color: 'var(--ink-3)', marginTop: 10, letterSpacing: '0.05em' }}>
-            Eingereicht am {submittedAt}
+            {t('adminDash.detail.submittedAt', { date: submittedAt })}
           </p>
         )}
       </div>
       <div style={{ display: 'flex', flexDirection: 'column', gap: 12, width: 200 }}>
         {qr.video_url ? (
           <div>
-            <p className="eyebrow" style={{ marginBottom: 4 }}>Video</p>
+            <p className="eyebrow" style={{ marginBottom: 4 }}>{t('adminDash.detail.video')}</p>
             <video
               src={qr.video_url}
               controls
@@ -74,23 +76,23 @@ function ContentDetail({ qr }: { qr: QRCode }) {
               }}
             />
             <a href={qr.video_url} target="_blank" rel="noopener noreferrer" style={{ display: 'block', marginTop: 4, fontFamily: 'var(--font-sans)', fontSize: 10, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'var(--ink-3)' }}>
-              Original öffnen ↗
+              {t('adminDash.detail.openOriginal')}
             </a>
           </div>
         ) : (
-          <p style={{ fontFamily: 'var(--font-sans)', fontSize: 12, color: 'var(--ink-3)' }}>Kein Video</p>
+          <p style={{ fontFamily: 'var(--font-sans)', fontSize: 12, color: 'var(--ink-3)' }}>{t('adminDash.detail.noVideo')}</p>
         )}
         {qr.image_url ? (
           <div>
-            <p className="eyebrow" style={{ marginBottom: 4 }}>Bild</p>
+            <p className="eyebrow" style={{ marginBottom: 4 }}>{t('adminDash.detail.image')}</p>
             {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src={qr.image_url} alt="Bild zur Botschaft" style={{ width: '100%', borderRadius: 3, display: 'block' }} />
+            <img src={qr.image_url} alt={t('adminDash.detail.image')} style={{ width: '100%', borderRadius: 3, display: 'block' }} />
             <a href={qr.image_url} target="_blank" rel="noopener noreferrer" style={{ display: 'block', marginTop: 4, fontFamily: 'var(--font-sans)', fontSize: 10, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'var(--ink-3)' }}>
-              Original öffnen ↗
+              {t('adminDash.detail.openOriginal')}
             </a>
           </div>
         ) : (
-          <p style={{ fontFamily: 'var(--font-sans)', fontSize: 12, color: 'var(--ink-3)' }}>Kein Bild</p>
+          <p style={{ fontFamily: 'var(--font-sans)', fontSize: 12, color: 'var(--ink-3)' }}>{t('adminDash.detail.noImage')}</p>
         )}
       </div>
     </div>
@@ -99,6 +101,7 @@ function ContentDetail({ qr }: { qr: QRCode }) {
 
 export default function AdminDashboard() {
   const router = useRouter();
+  const t = useT();
   const [qrCodes, setQrCodes] = useState<QRCode[]>([]);
   const [loading, setLoading] = useState(true);
   const [creating, setCreating] = useState(false);
@@ -152,31 +155,31 @@ export default function AdminDashboard() {
           setCreating(false);
           return createQRCodes();
         }
-        throw new Error(data.error || `Fehler (${res.status})`);
+        throw new Error(data.error || t('adminDash.create.errStatus', { status: res.status }));
       }
-      showToast(`${data.codes.length} QR-Code(s) erstellt`);
+      showToast(t('adminDash.create.toast', { n: data.codes.length }));
       setNote('');
       loadQRCodes();
     } catch (e: unknown) {
-      showToast(e instanceof Error ? e.message : 'Fehler beim Erstellen');
+      showToast(e instanceof Error ? e.message : t('adminDash.create.errGeneric'));
     } finally {
       setCreating(false);
     }
   }
 
   async function deleteQR(code: string) {
-    if (!confirm(`QR-Code ${code} wirklich löschen? Diese Aktion kann nicht rückgängig gemacht werden.`)) return;
+    if (!confirm(t('adminDash.confirmDelete', { code }))) return;
     const res = await fetch(`/api/admin/qr/${code}`, { method: 'DELETE' });
     if (res.status === 401) { router.push('/admin'); return; }
-    showToast(`QR-Code ${code} gelöscht`);
+    showToast(t('adminDash.toastDeleted', { code }));
     loadQRCodes();
   }
 
   async function resetQR(code: string) {
-    if (!confirm(`Standard-Inhalt für ${code} wiederherstellen? Der gespeicherte Inhalt wird entfernt.`)) return;
+    if (!confirm(t('adminDash.confirmReset', { code }))) return;
     const res = await fetch(`/api/admin/qr/${code}/reset`, { method: 'POST' });
     if (res.status === 401) { router.push('/admin'); return; }
-    showToast(`QR-Code ${code} zurückgesetzt`);
+    showToast(t('adminDash.toastReset', { code }));
     loadQRCodes();
   }
 
@@ -198,7 +201,7 @@ export default function AdminDashboard() {
       await downloadQR(qr.code);
       await new Promise(r => setTimeout(r, 200));
     }
-    showToast(`${filtered.length} QR-Code(s) heruntergeladen`);
+    showToast(t('adminDash.list.downloadedToast', { n: filtered.length }));
   }
 
   const filteredCodes = qrCodes.filter(q =>
@@ -222,8 +225,8 @@ export default function AdminDashboard() {
           {/* Header */}
           <div style={{ display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between', gap: 24, marginBottom: 40, flexWrap: 'wrap' }}>
             <div>
-              <p className="eyebrow">Verwaltung</p>
-              <h1 className="section-title">Admin <em>Konsole</em></h1>
+              <p className="eyebrow">{t('adminDash.eyebrow')}</p>
+              <h1 className="section-title">{t('adminDash.titlePre')} <em>{t('adminDash.titleEm')}</em></h1>
             </div>
             <button
               onClick={async () => {
@@ -232,26 +235,26 @@ export default function AdminDashboard() {
               }}
               style={{ background: 'none', border: 'none', fontFamily: 'var(--font-sans)', fontSize: 12, letterSpacing: '0.12em', textTransform: 'uppercase', color: 'var(--ink-3)', cursor: 'pointer' }}
             >
-              Abmelden
+              {t('nav.signOut')}
             </button>
           </div>
 
           {/* Tab navigation */}
           <div style={{ display: 'flex', gap: 0, borderBottom: '1px solid var(--line)', marginBottom: 32, overflowX: 'auto' }}>
             {([
-              { id: 'qr', label: 'QR-Codes' },
-              { id: 'submissions', label: 'E-Mail-Einreichungen' },
-              { id: 'content', label: 'Inhalte' },
-            ] as { id: Tab; label: string }[]).map(t => (
-              <button key={t.id} type="button" onClick={() => setActiveTab(t.id)}
+              { id: 'qr', label: t('adminDash.tabs.qr') },
+              { id: 'submissions', label: t('adminDash.tabs.submissions') },
+              { id: 'content', label: t('adminDash.tabs.content') },
+            ] as { id: Tab; label: string }[]).map(tab => (
+              <button key={tab.id} type="button" onClick={() => setActiveTab(tab.id)}
                 style={{
                   background: 'none', border: 'none', padding: '12px 18px', cursor: 'pointer',
                   fontFamily: 'var(--font-sans)', fontSize: 12, letterSpacing: '0.12em', textTransform: 'uppercase',
-                  color: activeTab === t.id ? 'var(--ink)' : 'var(--ink-3)',
-                  borderBottom: `2px solid ${activeTab === t.id ? 'var(--accent)' : 'transparent'}`,
+                  color: activeTab === tab.id ? 'var(--ink)' : 'var(--ink-3)',
+                  borderBottom: `2px solid ${activeTab === tab.id ? 'var(--accent)' : 'transparent'}`,
                   marginBottom: -1, whiteSpace: 'nowrap',
                 }}>
-                {t.label}
+                {tab.label}
               </button>
             ))}
           </div>
@@ -263,9 +266,9 @@ export default function AdminDashboard() {
           {/* Stats */}
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 12, marginBottom: 32 }}>
             {[
-              { label: 'Codes total', value: stats.total, badge: '' },
-              { label: 'Ausstehend', value: stats.pending, badge: 'badge-pending' },
-              { label: 'Gesperrt', value: stats.locked, badge: 'badge-locked' },
+              { label: t('adminDash.stats.total'), value: stats.total, badge: '' },
+              { label: t('adminDash.stats.pending'), value: stats.pending, badge: 'badge-pending' },
+              { label: t('adminDash.stats.locked'), value: stats.locked, badge: 'badge-locked' },
             ].map((s, i) => (
               <div key={i} className="card card-sm" style={{ textAlign: 'center' }}>
                 <div style={{ fontFamily: 'var(--font-display)', fontSize: 'clamp(28px,3vw,40px)', fontWeight: 700, color: 'var(--ink)', letterSpacing: '-0.015em' }}>{s.value}</div>
@@ -276,11 +279,11 @@ export default function AdminDashboard() {
 
           {/* Create QR codes */}
           <div className="card" style={{ marginBottom: 32 }}>
-            <p className="eyebrow">Neue QR-Codes</p>
-            <h2 style={{ fontFamily: 'var(--font-display)', fontSize: 22, fontWeight: 700, letterSpacing: '-0.01em', marginBottom: 20 }}>QR-Codes erstellen</h2>
+            <p className="eyebrow">{t('adminDash.create.eyebrow')}</p>
+            <h2 style={{ fontFamily: 'var(--font-display)', fontSize: 22, fontWeight: 700, letterSpacing: '-0.01em', marginBottom: 20 }}>{t('adminDash.create.title')}</h2>
             <div style={{ display: 'flex', gap: 16, alignItems: 'flex-end', flexWrap: 'wrap' }}>
               <div>
-                <label className="input-label" htmlFor="count">Anzahl</label>
+                <label className="input-label" htmlFor="count">{t('adminDash.create.count')}</label>
                 <input
                   id="count"
                   type="number"
@@ -293,18 +296,18 @@ export default function AdminDashboard() {
                 />
               </div>
               <div style={{ flex: 1, minWidth: 200 }}>
-                <label className="input-label" htmlFor="note">Notiz (optional)</label>
+                <label className="input-label" htmlFor="note">{t('adminDash.create.note')}</label>
                 <input
                   id="note"
                   type="text"
                   className="input-field"
-                  placeholder="z.B. Hochzeit Müller, Charge 2025-06"
+                  placeholder={t('adminDash.create.notePlaceholder')}
                   value={note}
                   onChange={e => setNote(e.target.value)}
                 />
               </div>
               <button className="btn btn-accent" onClick={createQRCodes} disabled={creating}>
-                {creating ? 'Erstelle…' : `${count} Code(s) erstellen`}
+                {creating ? t('adminDash.create.btnLoading') : t('adminDash.create.btn', { n: count })}
               </button>
             </div>
           </div>
@@ -313,28 +316,28 @@ export default function AdminDashboard() {
           <div className="card" style={{ padding: 0, overflow: 'hidden' }}>
             <div style={{ padding: '20px 24px', borderBottom: '1px solid var(--line)', display: 'flex', alignItems: 'center', gap: 16, flexWrap: 'wrap' }}>
               <h2 style={{ fontFamily: 'var(--font-display)', fontSize: 20, fontWeight: 700, letterSpacing: '-0.01em', flex: 1 }}>
-                Alle QR-Codes <span style={{ fontFamily: 'var(--font-sans)', fontSize: 14, color: 'var(--ink-3)', fontWeight: 400 }}>({filteredCodes.length})</span>
+                {t('adminDash.list.title')} <span style={{ fontFamily: 'var(--font-sans)', fontSize: 14, color: 'var(--ink-3)', fontWeight: 400 }}>({filteredCodes.length})</span>
               </h2>
               <input
                 type="text"
                 className="input-field"
-                placeholder="Suchen…"
+                placeholder={t('common.search')}
                 value={searchQuery}
                 onChange={e => setSearchQuery(e.target.value)}
                 style={{ width: 200, padding: '8px 12px', fontSize: 13 }}
               />
               <button className="btn btn-ghost btn-sm" onClick={downloadAllQRs} disabled={filteredCodes.length === 0}>
-                Alle SVGs laden
+                {t('adminDash.list.downloadAll')}
               </button>
             </div>
 
             {loading ? (
               <div style={{ padding: 48, textAlign: 'center', fontFamily: 'var(--font-sans)', fontSize: 14, color: 'var(--ink-3)' }}>
-                Lade Codes…
+                {t('adminDash.list.loading')}
               </div>
             ) : filteredCodes.length === 0 ? (
               <div style={{ padding: 48, textAlign: 'center' }}>
-                <p className="lede" style={{ textAlign: 'center' }}>Noch keine QR-Codes erstellt.</p>
+                <p className="lede" style={{ textAlign: 'center' }}>{t('adminDash.list.empty')}</p>
               </div>
             ) : (
               <>
@@ -344,7 +347,7 @@ export default function AdminDashboard() {
                     <thead>
                       <tr>
                         <th style={{ width: 28 }}></th>
-                        <th>Code</th><th>Status</th><th>Notiz</th><th>Absender</th><th>E-Mail</th><th>Erstellt</th><th style={{ textAlign: 'right' }}>Aktionen</th>
+                        <th>{t('adminDash.col.code')}</th><th>{t('adminDash.col.status')}</th><th>{t('adminDash.col.note')}</th><th>{t('adminDash.col.sender')}</th><th>{t('common.email')}</th><th>{t('adminDash.col.created')}</th><th style={{ textAlign: 'right' }}>{t('adminDash.col.actions')}</th>
                       </tr>
                     </thead>
                     <tbody>
@@ -367,10 +370,10 @@ export default function AdminDashboard() {
                               <td style={{ fontSize: 12, color: 'var(--ink-3)' }}>{qr.email || <span style={{ opacity: 0.4 }}>—</span>}</td>
                               <td style={{ fontSize: 12, color: 'var(--ink-3)', whiteSpace: 'nowrap' }}>{new Date(qr.created_at).toLocaleDateString('de-CH')}</td>
                               <td onClick={e => e.stopPropagation()}><div style={{ display: 'flex', gap: 6, justifyContent: 'flex-end' }}>
-                                <button className="btn btn-ghost btn-sm" onClick={() => downloadQR(qr.code)}>SVG</button>
-                                <Link href={`/q/${qr.code}/view`} className="btn btn-ghost btn-sm" target="_blank">Ansicht</Link>
-                                {qr.status === 'locked' && <button className="btn btn-ghost btn-sm" onClick={() => resetQR(qr.code)}>Reset</button>}
-                                <button className="btn btn-danger btn-sm" onClick={() => deleteQR(qr.code)}>Löschen</button>
+                                <button className="btn btn-ghost btn-sm" onClick={() => downloadQR(qr.code)}>{t('adminDash.action.svg')}</button>
+                                <Link href={`/q/${qr.code}/view`} className="btn btn-ghost btn-sm" target="_blank">{t('adminDash.action.view')}</Link>
+                                {qr.status === 'locked' && <button className="btn btn-ghost btn-sm" onClick={() => resetQR(qr.code)}>{t('adminDash.action.reset')}</button>}
+                                <button className="btn btn-danger btn-sm" onClick={() => deleteQR(qr.code)}>{t('adminDash.action.delete')}</button>
                               </div></td>
                             </tr>
                             {isExpanded && hasContent && (
@@ -417,10 +420,10 @@ export default function AdminDashboard() {
                           )}
                         </div>
                         <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
-                          <button className="btn btn-ghost btn-sm" onClick={() => downloadQR(qr.code)}>SVG</button>
-                          <Link href={`/q/${qr.code}/view`} className="btn btn-ghost btn-sm" target="_blank">Ansicht</Link>
-                          {qr.status === 'locked' && <button className="btn btn-ghost btn-sm" onClick={() => resetQR(qr.code)}>Reset</button>}
-                          <button className="btn btn-danger btn-sm" onClick={() => deleteQR(qr.code)}>Löschen</button>
+                          <button className="btn btn-ghost btn-sm" onClick={() => downloadQR(qr.code)}>{t('adminDash.action.svg')}</button>
+                          <Link href={`/q/${qr.code}/view`} className="btn btn-ghost btn-sm" target="_blank">{t('adminDash.action.view')}</Link>
+                          {qr.status === 'locked' && <button className="btn btn-ghost btn-sm" onClick={() => resetQR(qr.code)}>{t('adminDash.action.reset')}</button>}
+                          <button className="btn btn-danger btn-sm" onClick={() => deleteQR(qr.code)}>{t('adminDash.action.delete')}</button>
                         </div>
                         {isExpanded && hasContent && (
                           <div style={{ marginTop: 14, paddingTop: 14, borderTop: '1px dashed var(--line)' }}>

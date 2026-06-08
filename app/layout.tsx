@@ -1,5 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import "./globals.css";
+import { getLocale } from "@/lib/i18n-server";
+import { LocaleProvider } from "@/lib/i18n-client";
 
 const SITE_URL = "https://spine-orpin.vercel.app";
 
@@ -108,9 +110,10 @@ const jsonLd = {
   ],
 };
 
-export default function RootLayout({ children }: { children: React.ReactNode }) {
+export default async function RootLayout({ children }: { children: React.ReactNode }) {
+  const locale = await getLocale();
   return (
-    <html lang="de" data-theme="future" data-motion="on">
+    <html lang={locale} data-theme="future" data-motion="on">
       <head>
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
@@ -125,7 +128,9 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         />
       </head>
       <body style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
-        {children}
+        <LocaleProvider locale={locale}>
+          {children}
+        </LocaleProvider>
       </body>
     </html>
   );

@@ -2,12 +2,14 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { SiteHeader, SiteFooter } from '@/components/SiteHeader';
+import { useT } from '@/lib/i18n-client';
 
 export default function AdminLoginPage() {
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const router = useRouter();
+  const t = useT();
 
   async function handleLogin(e: React.FormEvent) {
     e.preventDefault();
@@ -20,10 +22,10 @@ export default function AdminLoginPage() {
         body: JSON.stringify({ password }),
       });
       const data = await res.json();
-      if (!res.ok) throw new Error(data.error || 'Falsches Passwort');
+      if (!res.ok) throw new Error(data.error || t('adminLogin.errWrong'));
       router.push('/admin/dashboard');
     } catch (e: unknown) {
-      setError(e instanceof Error ? e.message : 'Fehler');
+      setError(e instanceof Error ? e.message : t('adminLogin.errGeneric'));
     } finally {
       setLoading(false);
     }
@@ -35,14 +37,14 @@ export default function AdminLoginPage() {
       <main style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', paddingTop: 128, paddingBottom: 64, paddingLeft: 20, paddingRight: 20 }}>
         <div style={{ width: '100%', maxWidth: 400 }}>
           <div className="card">
-            <p className="eyebrow">Admin</p>
-            <h1 className="section-title" style={{ marginBottom: 8 }}>Anmeldung</h1>
+            <p className="eyebrow">{t('adminLogin.eyebrow')}</p>
+            <h1 className="section-title" style={{ marginBottom: 8 }}>{t('adminLogin.title')}</h1>
             <p style={{ fontFamily: 'var(--font-sans)', fontSize: 14, color: 'var(--ink-2)', marginBottom: 28, lineHeight: 1.65 }}>
-              Gib das Admin-Passwort ein, um auf die Verwaltungskonsole zuzugreifen.
+              {t('adminLogin.lede')}
             </p>
             <form onSubmit={handleLogin}>
               <div style={{ marginBottom: 20 }}>
-                <label className="input-label" htmlFor="password">Passwort</label>
+                <label className="input-label" htmlFor="password">{t('adminLogin.passwordLabel')}</label>
                 <input
                   id="password"
                   type="password"
@@ -59,7 +61,7 @@ export default function AdminLoginPage() {
                 </div>
               )}
               <button type="submit" className="btn btn-primary" disabled={loading} style={{ width: '100%', justifyContent: 'center' }}>
-                {loading ? 'Anmelden…' : 'Anmelden →'}
+                {loading ? t('adminLogin.signingIn') : t('adminLogin.signIn')}
               </button>
             </form>
           </div>

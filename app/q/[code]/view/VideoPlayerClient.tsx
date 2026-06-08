@@ -1,5 +1,6 @@
 'use client';
 import { useState, useRef } from 'react';
+import { useT } from '@/lib/i18n-client';
 
 type Props = {
   url: string;
@@ -12,6 +13,7 @@ type Props = {
 export function VideoPlayerClient({ url, senderName, fit = 'contain', objX = 50, objY = 50 }: Props) {
   const videoRef = useRef<HTMLVideoElement>(null);
   const [playing, setPlaying] = useState(false);
+  const t = useT();
 
   const play = () => {
     videoRef.current?.play();
@@ -47,13 +49,13 @@ export function VideoPlayerClient({ url, senderName, fit = 'contain', objX = 50,
           }}
         >
           <div style={{ fontFamily: 'var(--sans)', fontSize: 10, letterSpacing: '0.22em', textTransform: 'uppercase', color: 'rgba(245,239,224,0.9)', textShadow: '0 1px 2px rgba(0,0,0,0.6)' }}>
-            — Persönliche Videobotschaft —
+            — {t('view.video.label')} —
           </div>
           <button
             className="video-play-btn"
             style={{ width: 64, height: 64, borderRadius: '50%', border: '1.5px solid rgba(245,239,224,0.85)', background: 'rgba(0,0,0,0.35)', backdropFilter: 'blur(6px)', color: '#F5EFE0', display: 'flex', alignItems: 'center', justifyContent: 'center', paddingLeft: 4, cursor: 'pointer' }}
             onClick={play}
-            aria-label="Video abspielen"
+            aria-label={t('view.video.play')}
           >
             <svg viewBox="0 0 26 26" width={24} height={24} fill="currentColor">
               <polygon points="8,5 22,13 8,21" />

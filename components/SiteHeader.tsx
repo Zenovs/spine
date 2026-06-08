@@ -2,8 +2,11 @@
 import Link from 'next/link';
 import { useEffect } from 'react';
 import { ArrowRight } from '@carbon/icons-react';
+import { useT } from '@/lib/i18n-client';
+import { LanguageSwitcher } from './LanguageSwitcher';
 
 export function SiteHeader({ showAdmin = false }: { showAdmin?: boolean }) {
+  const t = useT();
   useEffect(() => {
     const header = document.getElementById('site-header');
     if (!header) return;
@@ -30,12 +33,13 @@ export function SiteHeader({ showAdmin = false }: { showAdmin?: boolean }) {
         </Link>
 
         {/* Nav */}
-        <nav aria-label="Hauptnavigation" style={{ display: 'flex', alignItems: 'center', gap: 28 }}>
+        <nav aria-label="Hauptnavigation" style={{ display: 'flex', alignItems: 'center', gap: 24 }}>
           <ul className="nav" style={{ display: 'none' }} id="main-nav">
-            <li><Link href="#how">So funktioniert es</Link></li>
-            <li><Link href="#cats">Produkte</Link></li>
-            <li><Link href="#ar">AR & Mixed Reality</Link></li>
+            <li><Link href="/#how">{t('nav.howItWorks')}</Link></li>
+            <li><Link href="/#cats">{t('nav.products')}</Link></li>
+            <li><Link href="/#ar">{t('nav.arMixed')}</Link></li>
           </ul>
+          <LanguageSwitcher />
           {showAdmin && (
             <Link href="/admin/dashboard" style={{
               fontFamily: 'var(--font-mono)',
@@ -45,11 +49,11 @@ export function SiteHeader({ showAdmin = false }: { showAdmin?: boolean }) {
               color: 'var(--ink-3)',
               textDecoration: 'none',
             }}>
-              Admin
+              {t('nav.admin')}
             </Link>
           )}
           <Link href="/admin" className="btn btn--primary btn-sm">
-            Demo starten <ArrowRight size={12} />
+            {t('common.demo')} <ArrowRight size={12} />
           </Link>
         </nav>
       </div>
@@ -65,6 +69,7 @@ export function SiteHeader({ showAdmin = false }: { showAdmin?: boolean }) {
 }
 
 export function SiteFooter() {
+  const t = useT();
   return (
     <footer className="footer">
       <div className="footer__inner">
@@ -80,16 +85,16 @@ export function SiteFooter() {
             <span>augmentedreality<span className="dot">.</span>ch</span>
           </div>
           <ul className="footer__links">
-            <li><Link href="#how">So funktioniert es</Link></li>
-            <li><Link href="#cats">Produkte</Link></li>
-            <li><Link href="#ar">AR & Mixed Reality</Link></li>
+            <li><Link href="/#how">{t('nav.howItWorks')}</Link></li>
+            <li><Link href="/#cats">{t('nav.products')}</Link></li>
+            <li><Link href="/#ar">{t('nav.arMixed')}</Link></li>
           </ul>
         </div>
         {/* Bottom row */}
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 16, flexWrap: 'wrap', borderTop: '1px solid var(--line)', paddingTop: 20 }}>
-          <span className="footer-copy">© 2026 augmentedreality.ch</span>
+          <span className="footer-copy">{t('footer.copy')}</span>
           <span className="footer__powered">
-            powered by{' '}
+            {t('footer.poweredBy')}{' '}
             <a href="https://wireon.ch" target="_blank" rel="noopener noreferrer">
               wireon
             </a>

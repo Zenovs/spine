@@ -4,11 +4,15 @@ import { useParams, useRouter } from 'next/navigation';
 import { upload } from '@vercel/blob/client';
 import { SiteHeader, SiteFooter } from '@/components/SiteHeader';
 import { compressVideo } from '@/lib/compress-video';
+import { useT } from '@/lib/i18n-client';
 
-function formatETA(seconds: number) {
-  if (seconds < 5) return 'wenige Sekunden';
-  if (seconds < 60) return `${Math.round(seconds)} Sek.`;
-  return `${Math.ceil(seconds / 60)} Min.`;
+type TFn = (key: string, vars?: Record<string, string | number>) => string;
+function makeFormatETA(t: TFn) {
+  return (seconds: number) => {
+    if (seconds < 5) return t('create.eta.fewSeconds');
+    if (seconds < 60) return t('create.eta.sec', { n: Math.round(seconds) });
+    return t('create.eta.min', { n: Math.ceil(seconds / 60) });
+  };
 }
 
 // Diagnostic logger — visible in Safari Web Inspector on iPhone
@@ -143,12 +147,12 @@ async function uploadWithStallGuard(
 }
 
 const IMAGE_TEMPLATES = [
-  { id: 't1', label: 'Weinberg', url: 'https://images.unsplash.com/photo-1506377247377-2a5b3b417ebb?w=400&h=300&fit=crop' },
-  { id: 't2', label: 'Weinglas', url: 'https://images.unsplash.com/photo-1510812431401-41d2bd2722f3?w=400&h=300&fit=crop' },
-  { id: 't3', label: 'Flaschen', url: 'https://images.unsplash.com/photo-1553361371-9b22f78e8b1d?w=400&h=300&fit=crop' },
-  { id: 't4', label: 'Reben', url: 'https://images.unsplash.com/photo-1474722883778-792e7990302f?w=400&h=300&fit=crop' },
-  { id: 't5', label: 'Herbst', url: 'https://images.unsplash.com/photo-1516912481808-3406841bd33c?w=400&h=300&fit=crop' },
-  { id: 't6', label: 'Keller', url: 'https://images.unsplash.com/photo-1504279807002-09854ccc9b6c?w=400&h=300&fit=crop' },
+  { id: 't1', labelKey: 'create.tpl.t1', url: 'https://images.unsplash.com/photo-1506377247377-2a5b3b417ebb?w=400&h=300&fit=crop' },
+  { id: 't2', labelKey: 'create.tpl.t2', url: 'https://images.unsplash.com/photo-1510812431401-41d2bd2722f3?w=400&h=300&fit=crop' },
+  { id: 't3', labelKey: 'create.tpl.t3', url: 'https://images.unsplash.com/photo-1553361371-9b22f78e8b1d?w=400&h=300&fit=crop' },
+  { id: 't4', labelKey: 'create.tpl.t4', url: 'https://images.unsplash.com/photo-1474722883778-792e7990302f?w=400&h=300&fit=crop' },
+  { id: 't5', labelKey: 'create.tpl.t5', url: 'https://images.unsplash.com/photo-1516912481808-3406841bd33c?w=400&h=300&fit=crop' },
+  { id: 't6', labelKey: 'create.tpl.t6', url: 'https://images.unsplash.com/photo-1504279807002-09854ccc9b6c?w=400&h=300&fit=crop' },
 ];
 
 type ImageSource = 'none' | 'template' | 'upload';
@@ -157,6 +161,8 @@ type CompState = 'idle' | 'preparing' | 'compressing' | 'ready' | 'failed';
 export default function CreatePage() {
   const { code } = useParams<{ code: string }>();
   const router = useRouter();
+  const t = useT();
+  const formatETA = makeFormatETA(t);
 
   const [senderName, setSenderName] = useState('');
   const [message, setMessage] = useState('');
@@ -193,7 +199,7 @@ export default function CreatePage() {
   function handleVideoChange(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
     if (!file) return;
-    if (file.size > 200 * 1024 * 1024) { setError('Video max. 200 MB'); return; }
+    if (file.size > 200 * 1024 * 1024) { setError(t('create.err.videoSize')); return; }
     setError('');
     setVideoFile(file);
     setVideoPreview(URL.createObjectURL(file));
@@ -215,7 +221,7 @@ export default function CreatePage() {
   function startCompression(file: File) {
     const myId = ++compIdRef.current;
     setCompState('preparing');
-    setCompStage('Wird vorbereitet…');
+    setCompStage(t('create.compress.preparing'));
     setCompPct(0);
 
     compPromiseRef.current = (async () => {
@@ -234,15 +240,15 @@ export default function CreatePage() {
         setCompPct(100);
         setCompState('ready');
         setCompStage(result.didCompress
-          ? `✓ Komprimiert: ${result.originalMB.toFixed(0)} MB → ${result.compressedMB.toFixed(0)} MB`
-          : `✓ Bereit zum Hochladen · ${result.originalMB.toFixed(0)} MB`);
+          ? t('create.compress.compressed', { from: result.originalMB.toFixed(0), to: result.compressedMB.toFixed(0) })
+          : `${t('create.compress.ready')} · ${result.originalMB.toFixed(0)} MB`);
         ulog('precompress done', { didCompress: result.didCompress, originalMB: result.originalMB.toFixed(2), compressedMB: result.compressedMB.toFixed(2) });
         return result.file;
       } catch (err) {
         if (myId !== compIdRef.current) throw err;
         ulog('precompress failed — original wird verwendet:', err);
         setCompState('failed');
-        setCompStage(`Komprimierung fehlgeschlagen · Original ${(file.size / 1e6).toFixed(0)} MB wird hochgeladen`);
+        setCompStage(t('create.compress.failed', { mb: (file.size / 1e6).toFixed(0) }));
         return file;
       }
     })();
@@ -251,7 +257,7 @@ export default function CreatePage() {
   function handleImageChange(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
     if (!file) return;
-    if (file.size > 10 * 1024 * 1024) { setError('Bild max. 10 MB'); return; }
+    if (file.size > 10 * 1024 * 1024) { setError(t('create.err.imageSize')); return; }
     setImageFile(file);
     setImagePreview(URL.createObjectURL(file));
     setImageSource('upload');
@@ -281,7 +287,7 @@ export default function CreatePage() {
         let toUpload: File;
         if (compPromiseRef.current) {
           if (compState !== 'ready' && compState !== 'failed') {
-            setUploadProgress('Komprimierung wird abgeschlossen…');
+            setUploadProgress(t('create.upload.finishingCompress'));
             setUploadPercent(0);
           }
           toUpload = await compPromiseRef.current;
@@ -289,12 +295,12 @@ export default function CreatePage() {
           toUpload = videoFile;
         }
 
-        if (uploadAbortRef.current.signal.aborted) throw new Error('Abgebrochen');
-        if (toUpload.size === 0) throw new Error('Video-Datei ist leer (0 Byte) — bitte erneut auswählen');
+        if (uploadAbortRef.current.signal.aborted) throw new Error(t('create.err.aborted'));
+        if (toUpload.size === 0) throw new Error(t('create.upload.empty'));
 
         // Pre-flight: verify token endpoint reachable & env configured BEFORE wasting 45s
         // on the SDK's silent retries when /api/upload is misconfigured.
-        setUploadProgress('Verbindung wird geprüft…');
+        setUploadProgress(t('create.upload.preflight'));
         const ping = await pingUploadEndpoint();
         ulog('preflight ping /api/upload', ping);
         if (!ping.ok) {
@@ -303,7 +309,7 @@ export default function CreatePage() {
         }
 
         const mb = (toUpload.size / 1e6).toFixed(0);
-        setUploadProgress(`Video wird hochgeladen · ${mb} MB`);
+        setUploadProgress(t('create.upload.video', { mb }));
         setUploadPercent(0);
         setUploadETA('');
         uploadStartRef.current = Date.now();
@@ -328,9 +334,9 @@ export default function CreatePage() {
       }
 
       if (imageSource === 'upload' && imageFile) {
-        if (uploadAbortRef.current.signal.aborted) throw new Error('Abgebrochen');
+        if (uploadAbortRef.current.signal.aborted) throw new Error(t('create.err.aborted'));
         ulog('image upload start', { name: imageFile.name, sizeMB: (imageFile.size / 1e6).toFixed(2) });
-        setUploadProgress('Bild wird hochgeladen…');
+        setUploadProgress(t('create.upload.image'));
         setUploadPercent(0);
         setUploadRetries(0);
         uploadStartRef.current = Date.now();
@@ -347,9 +353,9 @@ export default function CreatePage() {
         imageUrl = IMAGE_TEMPLATES.find(t => t.id === selectedTemplate)?.url || '';
       }
 
-      if (uploadAbortRef.current.signal.aborted) throw new Error('Abgebrochen');
+      if (uploadAbortRef.current.signal.aborted) throw new Error(t('create.err.aborted'));
       ulog('save content start');
-      setUploadProgress('Botschaft wird gespeichert…');
+      setUploadProgress(t('create.upload.saving'));
       setUploadPercent(0);
       const res = await fetch('/api/content/save', {
         method: 'POST',
@@ -390,7 +396,7 @@ export default function CreatePage() {
 
           {/* Step indicator */}
           <div style={{ display: 'flex', alignItems: 'center', marginBottom: 28 }}>
-            {[{ n: 1, label: 'Botschaft' }, { n: 2, label: 'Video' }, { n: 3, label: 'Bild' }].map((s, i) => (
+            {[{ n: 1, label: t('create.steps.label1') }, { n: 2, label: t('create.steps.label2') }, { n: 3, label: t('create.steps.label3') }].map((s, i) => (
               <>
                 <div key={s.n} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 4 }}>
                   <div style={{
@@ -419,33 +425,33 @@ export default function CreatePage() {
               <div className="card">
                 <p className="eyebrow">1 / 3</p>
                 <h1 className="section-title" style={{ fontSize: 'clamp(22px,5vw,38px)', marginBottom: 8 }}>
-                  Deine <em>Grussworte</em>
+                  {t('create.s1.titlePre')} <em>{t('create.s1.titleEm')}</em>
                 </h1>
                 <p style={{ fontFamily: 'var(--font-sans)', fontSize: 14, color: 'var(--ink-2)', marginBottom: 24, lineHeight: 1.6 }}>
-                  Was möchtest du dem Empfänger mitteilen?
+                  {t('create.s1.sub')}
                 </p>
 
                 <div style={{ marginBottom: 16 }}>
-                  <label className="input-label" htmlFor="senderName">Dein Name</label>
-                  <input id="senderName" type="text" className="input-field" placeholder="z.B. Maria & Thomas"
+                  <label className="input-label" htmlFor="senderName">{t('create.s1.nameLabel')}</label>
+                  <input id="senderName" type="text" className="input-field" placeholder={t('create.s1.namePlaceholder')}
                     value={senderName} onChange={e => setSenderName(e.target.value)} required
                     style={{ fontSize: 16 }} />
                 </div>
 
                 <div style={{ marginBottom: 24 }}>
-                  <label className="input-label" htmlFor="message">Persönliche Botschaft</label>
+                  <label className="input-label" htmlFor="message">{t('create.s1.messageLabel')}</label>
                   <textarea id="message" className="input-field"
-                    placeholder="Schreibe hier deine persönliche Botschaft…"
+                    placeholder={t('create.s1.messagePlaceholder')}
                     value={message} onChange={e => setMessage(e.target.value)}
                     style={{ minHeight: 140, fontSize: 16 }} required />
                   <div style={{ textAlign: 'right', fontFamily: 'var(--font-sans)', fontSize: 11, color: 'var(--ink-3)', marginTop: 4 }}>
-                    {message.length} Zeichen
+                    {t('create.s1.charCount', { n: message.length })}
                   </div>
                 </div>
 
                 <button type="button" className="btn btn-accent" disabled={!canProceedStep1}
                   onClick={() => setStep(2)} style={{ width: '100%', justifyContent: 'center', fontSize: 13 }}>
-                  Weiter →
+                  {t('common.next')}
                 </button>
               </div>
             )}
@@ -455,10 +461,10 @@ export default function CreatePage() {
               <div className="card">
                 <p className="eyebrow">2 / 3</p>
                 <h1 className="section-title" style={{ fontSize: 'clamp(22px,5vw,38px)', marginBottom: 8 }}>
-                  Dein <em>Video</em>
+                  {t('create.s2.titlePre')} <em>{t('create.s2.titleEm')}</em>
                 </h1>
                 <p style={{ fontFamily: 'var(--font-sans)', fontSize: 14, color: 'var(--ink-2)', marginBottom: 24, lineHeight: 1.6 }}>
-                  Optional: Lade eine Videobotschaft hoch (max. 200 MB).
+                  {t('create.s2.sub')}
                 </p>
 
                 {videoPreview ? (
@@ -495,7 +501,7 @@ export default function CreatePage() {
                       />
                       {videoFit === 'cover' && (
                         <div style={{ position: 'absolute', bottom: 8, left: '50%', transform: 'translateX(-50%)', background: 'rgba(0,0,0,0.55)', color: 'white', fontFamily: 'var(--font-sans)', fontSize: 10, letterSpacing: '0.12em', textTransform: 'uppercase', padding: '4px 10px', borderRadius: 999, pointerEvents: 'none' }}>
-                          Ziehen zum Ausrichten
+                          {t('create.s2.dragAlign')}
                         </div>
                       )}
                     </div>
@@ -503,11 +509,11 @@ export default function CreatePage() {
                       <button type="button"
                         onClick={() => { setVideoFit(f => f === 'contain' ? 'cover' : 'contain'); setVideoObjPos({ x: 50, y: 50 }); }}
                         style={{ background: 'none', border: '1px solid var(--line)', borderRadius: 999, fontFamily: 'var(--font-sans)', fontSize: 11, letterSpacing: '0.1em', textTransform: 'uppercase', color: 'var(--ink-3)', cursor: 'pointer', padding: '4px 12px' }}>
-                        {videoFit === 'contain' ? '⊡ Ausfüllen' : '⊞ Anpassen'}
+                        {videoFit === 'contain' ? t('create.s2.fitFill') : t('create.s2.fitContain')}
                       </button>
                       <button type="button" onClick={resetVideo}
                         style={{ background: 'none', border: 'none', fontFamily: 'var(--font-sans)', fontSize: 12, letterSpacing: '0.12em', textTransform: 'uppercase', color: 'var(--ink-3)', cursor: 'pointer' }}>
-                        Entfernen ×
+                        {t('create.s2.remove')}
                       </button>
                     </div>
 
@@ -528,7 +534,7 @@ export default function CreatePage() {
                           )}
                         </div>
                         <p style={{ fontFamily: 'var(--font-sans)', fontSize: 10, color: 'var(--ink-3)', marginTop: 6, letterSpacing: '0.04em' }}>
-                          Das Video wird im Hintergrund vorbereitet — du kannst bereits weitermachen.
+                          {t('create.compress.bgHint')}
                         </p>
                       </div>
                     )}
@@ -547,10 +553,10 @@ export default function CreatePage() {
                   <div className="upload-zone" style={{ marginBottom: 20 }} onClick={() => videoInputRef.current?.click()}>
                     <div style={{ fontSize: 32, marginBottom: 10, opacity: 0.25 }}>▶</div>
                     <p style={{ fontFamily: 'var(--font-sans)', fontSize: 15, color: 'var(--ink-2)', marginBottom: 4 }}>
-                      Video auswählen
+                      {t('create.s2.pick')}
                     </p>
                     <p style={{ fontFamily: 'var(--font-sans)', fontSize: 12, color: 'var(--ink-3)' }}>
-                      MP4, MOV, WebM · max. 200 MB
+                      {t('create.s2.fileTypes')}
                     </p>
                     <input ref={videoInputRef} type="file"
                       accept="video/mp4,video/mov,video/quicktime,video/webm,video/*"
@@ -560,9 +566,9 @@ export default function CreatePage() {
 
                 <div className="btn-row">
                   <button type="button" className="btn btn-ghost" onClick={() => setStep(1)}
-                    style={{ flex: 1, justifyContent: 'center', fontSize: 12 }}>← Zurück</button>
+                    style={{ flex: 1, justifyContent: 'center', fontSize: 12 }}>{t('common.back')}</button>
                   <button type="button" className="btn btn-accent" onClick={() => setStep(3)}
-                    style={{ flex: 2, justifyContent: 'center', fontSize: 13 }}>Weiter →</button>
+                    style={{ flex: 2, justifyContent: 'center', fontSize: 13 }}>{t('common.next')}</button>
                 </div>
               </div>
             )}
@@ -572,10 +578,10 @@ export default function CreatePage() {
               <div className="card">
                 <p className="eyebrow">3 / 3</p>
                 <h1 className="section-title" style={{ fontSize: 'clamp(22px,5vw,38px)', marginBottom: 8 }}>
-                  Dein <em>Bild</em> <span style={{ fontFamily: 'var(--font-sans)', fontStyle: 'normal', fontSize: 14, color: 'var(--ink-3)', letterSpacing: '0.06em', textTransform: 'uppercase' }}>(optional)</span>
+                  {t('create.s3.titlePre')} <em>{t('create.s3.titleEm')}</em> <span style={{ fontFamily: 'var(--font-sans)', fontStyle: 'normal', fontSize: 14, color: 'var(--ink-3)', letterSpacing: '0.06em', textTransform: 'uppercase' }}>{t('create.s3.optional')}</span>
                 </h1>
                 <p style={{ fontFamily: 'var(--font-sans)', fontSize: 14, color: 'var(--ink-2)', marginBottom: 16, lineHeight: 1.6 }}>
-                  Wähle ein Vorlagenbild, lade ein eigenes hoch — oder lass es weg, wenn nur dein Video & deine Botschaft zu sehen sein sollen.
+                  {t('create.s3.sub')}
                 </p>
 
                 {/* "No image" toggle */}
@@ -595,27 +601,27 @@ export default function CreatePage() {
                     {imageSource === 'none' && <span style={{ width: 8, height: 8, borderRadius: '50%', background: 'var(--accent)' }} />}
                   </span>
                   <span style={{ fontFamily: 'var(--font-sans)', fontSize: 13, color: imageSource === 'none' ? 'var(--accent)' : 'var(--ink-2)', letterSpacing: '0.02em' }}>
-                    Kein Bild anzeigen
+                    {t('create.s3.noImage')}
                   </span>
                 </button>
 
                 {/* Templates — 2 columns on mobile */}
-                <p className="input-label">Vorlage wählen</p>
+                <p className="input-label">{t('create.s3.pickTemplate')}</p>
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 8, marginBottom: 16 }}>
-                  {IMAGE_TEMPLATES.map(t => (
-                    <div key={t.id} onClick={() => { setSelectedTemplate(t.id); setImageSource('template'); setImageFile(null); setImagePreview(''); }}
+                  {IMAGE_TEMPLATES.map(tpl => (
+                    <div key={tpl.id} onClick={() => { setSelectedTemplate(tpl.id); setImageSource('template'); setImageFile(null); setImagePreview(''); }}
                       style={{
                         aspectRatio: '4/3', borderRadius: 3, overflow: 'hidden', cursor: 'pointer', position: 'relative',
-                        border: `2px solid ${selectedTemplate === t.id ? 'var(--accent)' : 'transparent'}`,
+                        border: `2px solid ${selectedTemplate === tpl.id ? 'var(--accent)' : 'transparent'}`,
                         transition: 'border-color 0.2s',
                       }}>
                       {/* eslint-disable-next-line @next/next/no-img-element */}
-                      <img src={t.url} alt={t.label} style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} />
-                      {selectedTemplate === t.id && (
+                      <img src={tpl.url} alt={t(tpl.labelKey)} style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} />
+                      {selectedTemplate === tpl.id && (
                         <div style={{ position: 'absolute', inset: 0, background: 'rgba(77,107,255,0.4)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white', fontSize: 18 }}>✓</div>
                       )}
                       <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, background: 'linear-gradient(transparent,rgba(0,0,0,0.55))', padding: '6px 6px 4px', fontFamily: 'var(--font-sans)', fontSize: 9, color: 'white', letterSpacing: '0.1em', textTransform: 'uppercase' }}>
-                        {t.label}
+                        {t(tpl.labelKey)}
                       </div>
                     </div>
                   ))}
@@ -623,24 +629,24 @@ export default function CreatePage() {
 
                 <div style={{ display: 'flex', alignItems: 'center', gap: 12, margin: '16px 0' }}>
                   <hr style={{ flex: 1, border: 'none', borderTop: '1px solid var(--line)' }} />
-                  <span style={{ fontFamily: 'var(--font-sans)', fontSize: 11, letterSpacing: '0.14em', textTransform: 'uppercase', color: 'var(--ink-3)' }}>oder</span>
+                  <span style={{ fontFamily: 'var(--font-sans)', fontSize: 11, letterSpacing: '0.14em', textTransform: 'uppercase', color: 'var(--ink-3)' }}>{t('common.or')}</span>
                   <hr style={{ flex: 1, border: 'none', borderTop: '1px solid var(--line)' }} />
                 </div>
 
                 {imagePreview ? (
                   <div style={{ marginBottom: 20 }}>
                     {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img src={imagePreview} alt="Vorschau" style={{ width: '100%', borderRadius: 3, maxHeight: 200, objectFit: 'cover', display: 'block' }} />
+                    <img src={imagePreview} alt="" style={{ width: '100%', borderRadius: 3, maxHeight: 200, objectFit: 'cover', display: 'block' }} />
                     <button type="button" onClick={() => { setImageFile(null); setImagePreview(''); setImageSource('none'); }}
                       style={{ marginTop: 8, background: 'none', border: 'none', fontFamily: 'var(--font-sans)', fontSize: 12, letterSpacing: '0.12em', textTransform: 'uppercase', color: 'var(--ink-3)', cursor: 'pointer' }}>
-                      Bild entfernen ×
+                      {t('create.s3.removeImage')}
                     </button>
                   </div>
                 ) : (
                   <div className="upload-zone" style={{ marginBottom: 20 }} onClick={() => imageInputRef.current?.click()}>
                     <div style={{ fontSize: 28, marginBottom: 8, opacity: 0.25 }}>🖼</div>
-                    <p style={{ fontFamily: 'var(--font-sans)', fontSize: 14, color: 'var(--ink-2)', marginBottom: 4 }}>Eigenes Bild hochladen</p>
-                    <p style={{ fontFamily: 'var(--font-sans)', fontSize: 12, color: 'var(--ink-3)' }}>JPG, PNG, WebP · max. 10 MB</p>
+                    <p style={{ fontFamily: 'var(--font-sans)', fontSize: 14, color: 'var(--ink-2)', marginBottom: 4 }}>{t('create.s3.uploadOwnTitle')}</p>
+                    <p style={{ fontFamily: 'var(--font-sans)', fontSize: 12, color: 'var(--ink-3)' }}>{t('create.s3.uploadOwnTypes')}</p>
                     <input ref={imageInputRef} type="file" accept="image/jpeg,image/png,image/webp,image/heic"
                       onChange={handleImageChange} style={{ display: 'none' }} />
                   </div>
@@ -654,13 +660,13 @@ export default function CreatePage() {
 
                 {loading && uploadProgress && (
                   <div style={{ fontFamily: 'var(--font-sans)', fontSize: 11, color: 'var(--ink-3)', marginBottom: 12, textAlign: 'center', letterSpacing: '0.04em' }}>
-                    Bitte Tab geöffnet lassen und Bildschirm aktiv halten
+                    {t('create.s3.tabHint')}
                   </div>
                 )}
 
                 <div style={{ background: 'rgba(77,107,255,0.05)', border: '1px solid rgba(77,107,255,0.15)', padding: '12px 14px', marginBottom: 18, borderRadius: 2 }}>
                   <p style={{ fontFamily: 'var(--font-sans)', fontSize: 12, color: 'var(--ink-2)', lineHeight: 1.55 }}>
-                    <strong style={{ color: 'var(--accent)' }}>Achtung:</strong> Nach dem Speichern kann der Inhalt nicht mehr geändert werden.
+                    <strong style={{ color: 'var(--accent)' }}>{t('create.s3.warning')}</strong> {t('create.s3.warningBody')}
                   </p>
                 </div>
 
@@ -669,7 +675,7 @@ export default function CreatePage() {
                   <div style={{ marginBottom: 16 }}>
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
                       <span style={{ fontFamily: 'var(--font-sans)', fontSize: 12, color: 'var(--ink-3)', letterSpacing: '0.06em' }}>
-                        {uploadPercent >= 95 && uploadPercent < 100 ? 'Wird abgeschlossen…' : uploadProgress}
+                        {uploadPercent >= 95 && uploadPercent < 100 ? t('create.upload.finishing') : uploadProgress}
                       </span>
                       {uploadPercent > 0 && uploadPercent < 95 && (
                         <span style={{ fontFamily: 'var(--font-sans)', fontSize: 13, fontWeight: 600, color: 'var(--ink)' }}>
@@ -687,12 +693,12 @@ export default function CreatePage() {
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: 6 }}>
                       <span style={{ fontFamily: 'var(--font-sans)', fontSize: 11, color: uploadRetries > 0 ? 'var(--accent)' : 'var(--ink-3)' }}>
                         {uploadRetries > 0
-                          ? `Verbindung instabil · ${uploadRetries} Wiederholung${uploadRetries === 1 ? '' : 'en'}`
-                          : (uploadETA && uploadPercent < 95 ? `noch ca. ${uploadETA}` : ' ')}
+                          ? t(uploadRetries === 1 ? 'create.upload.unstable' : 'create.upload.unstablePl', { n: uploadRetries })
+                          : (uploadETA && uploadPercent < 95 ? t('create.upload.eta', { eta: uploadETA }) : ' ')}
                       </span>
                       <button type="button" onClick={cancelUpload}
                         style={{ background: 'none', border: 'none', fontFamily: 'var(--font-sans)', fontSize: 11, letterSpacing: '0.1em', textTransform: 'uppercase', color: 'var(--ink-3)', cursor: 'pointer', padding: 0 }}>
-                        Abbrechen ×
+                        {t('create.upload.cancel')}
                       </button>
                     </div>
                   </div>
@@ -700,10 +706,10 @@ export default function CreatePage() {
 
                 <div className="btn-row">
                   <button type="button" className="btn btn-ghost" onClick={() => setStep(2)} disabled={loading}
-                    style={{ flex: 1, justifyContent: 'center', fontSize: 12 }}>← Zurück</button>
+                    style={{ flex: 1, justifyContent: 'center', fontSize: 12 }}>{t('common.back')}</button>
                   <button type="submit" className="btn btn-accent" disabled={loading || !canProceedStep1}
                     style={{ flex: 2, justifyContent: 'center', fontSize: 13 }}>
-                    {loading ? (uploadProgress || 'Lädt…') : 'Für immer speichern →'}
+                    {loading ? (uploadProgress || t('common.loading')) : t('create.s3.save')}
                   </button>
                 </div>
               </div>

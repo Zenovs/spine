@@ -2,12 +2,14 @@
 import { useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { SiteHeader, SiteFooter } from '@/components/SiteHeader';
+import { useT } from '@/lib/i18n-client';
 
 type Step = 'email' | 'code';
 
 export default function VerifyPage() {
   const { code } = useParams<{ code: string }>();
   const router = useRouter();
+  const t = useT();
 
   const [step, setStep] = useState<Step>('email');
   const [email, setEmail] = useState('');
@@ -27,14 +29,14 @@ export default function VerifyPage() {
         body: JSON.stringify({ code, email }),
       });
       const data = await res.json();
-      if (!res.ok) throw new Error(data.error || 'Fehler beim Senden');
+      if (!res.ok) throw new Error(data.error || t('create.err.generic'));
       if (data.demoCode) {
         setDemoCode(data.demoCode);
         setVerifyCode(data.demoCode);
       }
       setStep('code');
     } catch (e: unknown) {
-      setError(e instanceof Error ? e.message : 'Unbekannter Fehler');
+      setError(e instanceof Error ? e.message : t('create.err.generic'));
     } finally {
       setLoading(false);
     }
@@ -51,10 +53,10 @@ export default function VerifyPage() {
         body: JSON.stringify({ code, email, verifyCode }),
       });
       const data = await res.json();
-      if (!res.ok) throw new Error(data.error || 'Falscher Code');
+      if (!res.ok) throw new Error(data.error || t('create.err.generic'));
       router.push(`/q/${code}/create`);
     } catch (e: unknown) {
-      setError(e instanceof Error ? e.message : 'Unbekannter Fehler');
+      setError(e instanceof Error ? e.message : t('create.err.generic'));
     } finally {
       setLoading(false);
     }
@@ -67,33 +69,32 @@ export default function VerifyPage() {
         <div style={{ width: '100%', maxWidth: 480 }}>
           {/* Steps */}
           <div style={{ display: 'flex', alignItems: 'center', marginBottom: 40 }}>
-            <StepDot num={1} label="E-Mail" active={step === 'email'} done={step === 'code'} />
+            <StepDot num={1} label={t('verify.step.email')} active={step === 'email'} done={step === 'code'} />
             <div style={{ flex: 1, height: 1, background: 'var(--line)', margin: '0 12px' }} />
-            <StepDot num={2} label="Code" active={step === 'code'} done={false} />
+            <StepDot num={2} label={t('verify.step.code')} active={step === 'code'} done={false} />
             <div style={{ flex: 1, height: 1, background: 'var(--line)', margin: '0 12px' }} />
-            <StepDot num={3} label="Botschaft" active={false} done={false} />
+            <StepDot num={3} label={t('create.steps.label1')} active={false} done={false} />
           </div>
 
           <div className="card">
             {step === 'email' ? (
               <form onSubmit={sendCode}>
-                <p className="eyebrow">Schritt 1 von 2</p>
+                <p className="eyebrow">1 / 2</p>
                 <h1 className="section-title" style={{ marginBottom: 12 }}>
-                  Deine <em>E-Mail</em>
+                  {t('verify.email.title')}
                 </h1>
                 <p style={{ fontFamily: 'var(--font-sans)', fontSize: 15, color: 'var(--ink-2)', lineHeight: 1.65, marginBottom: 28 }}>
-                  Gib deine E-Mail-Adresse ein. Wir senden dir einen Verifizierungscode —
-                  damit dein Name für immer mit dieser Flasche verbunden ist.
+                  {t('verify.email.lede')}
                 </p>
 
                 <div style={{ marginBottom: 20 }}>
-                  <label className="input-label" htmlFor="email">E-Mail-Adresse</label>
+                  <label className="input-label" htmlFor="email">{t('verify.email.label')}</label>
                   <input
                     id="email"
                     type="email"
                     required
                     className="input-field"
-                    placeholder="deine@email.ch"
+                    placeholder={t('verify.email.placeholder')}
                     value={email}
                     onChange={e => setEmail(e.target.value)}
                   />
@@ -102,29 +103,27 @@ export default function VerifyPage() {
                 {error && <ErrorBox msg={error} />}
 
                 <button type="submit" className="btn btn-accent" disabled={loading} style={{ width: '100%', justifyContent: 'center' }}>
-                  {loading ? 'Sende Code…' : 'Code anfordern →'}
+                  {loading ? t('verify.email.sending') : t('verify.email.send') + ' →'}
                 </button>
               </form>
             ) : (
               <form onSubmit={confirmCode}>
-                <p className="eyebrow">Schritt 2 von 2</p>
+                <p className="eyebrow">2 / 2</p>
                 <h1 className="section-title" style={{ marginBottom: 12 }}>
-                  Code <em>eingeben</em>
+                  {t('verify.code.title')}
                 </h1>
                 {demoCode ? (
                   <div style={{ background: 'var(--accent-tint)', border: '1px solid rgba(77,107,255,0.3)', padding: '12px 16px', marginBottom: 24, borderRadius: 2 }}>
-                    <p style={{ fontFamily: 'var(--font-sans)', fontSize: 12, letterSpacing: '0.12em', textTransform: 'uppercase', color: 'var(--accent-strong)', marginBottom: 6 }}>Demo-Modus — kein E-Mail-Versand konfiguriert</p>
-                    <p style={{ fontFamily: 'var(--font-sans)', fontSize: 14, color: 'var(--ink-2)' }}>Dein Code wurde automatisch eingetragen:</p>
+                    <p style={{ fontFamily: 'var(--font-sans)', fontSize: 12, letterSpacing: '0.12em', textTransform: 'uppercase', color: 'var(--accent-strong)', marginBottom: 6 }}>{t('verify.demoMode')}</p>
                   </div>
                 ) : (
                   <p style={{ fontFamily: 'var(--font-sans)', fontSize: 15, color: 'var(--ink-2)', lineHeight: 1.65, marginBottom: 28 }}>
-                    Wir haben einen 6-stelligen Code an <strong style={{ color: 'var(--ink)' }}>{email}</strong> gesendet.
-                    Gültig für 15 Minuten.
+                    {t('verify.code.sentTo', { email })}
                   </p>
                 )}
 
                 <div style={{ marginBottom: 20 }}>
-                  <label className="input-label" htmlFor="vcode">Verifizierungscode</label>
+                  <label className="input-label" htmlFor="vcode">{t('verify.code.label')}</label>
                   <input
                     id="vcode"
                     type="text"
@@ -143,14 +142,14 @@ export default function VerifyPage() {
                 {error && <ErrorBox msg={error} />}
 
                 <button type="submit" className="btn btn-accent" disabled={loading || verifyCode.length < 6} style={{ width: '100%', justifyContent: 'center' }}>
-                  {loading ? 'Prüfe Code…' : 'Bestätigen →'}
+                  {loading ? t('verify.code.confirming') : t('verify.code.confirm') + ' →'}
                 </button>
                 <button
                   type="button"
                   onClick={() => { setStep('email'); setVerifyCode(''); setError(''); }}
                   style={{ marginTop: 12, background: 'none', border: 'none', width: '100%', textAlign: 'center', fontFamily: 'var(--font-sans)', fontSize: 12, letterSpacing: '0.12em', textTransform: 'uppercase', color: 'var(--ink-3)', cursor: 'pointer' }}
                 >
-                  Andere E-Mail verwenden
+                  {t('verify.code.changeEmail')}
                 </button>
               </form>
             )}
