@@ -1,6 +1,7 @@
 'use client';
 import { useEffect, useRef } from 'react';
 import { SiteHeader, SiteFooter } from '@/components/SiteHeader';
+import { HLSVideoLoop } from '@/components/HLSVideoLoop';
 import { useT } from '@/lib/i18n-client';
 import {
   QrCode,
@@ -341,83 +342,18 @@ export default function Home() {
                 </ul>
               </div>
 
-              {/* Phone mockup with AR animations */}
-              <div className="phone-wrap" data-reveal data-reveal-delay="2">
-                {/* Ambient glow */}
-                <div className="glow" style={{ width: 280, height: 280, top: '50%', left: '50%', transform: 'translate(-50%,-50%)', animation: 'pulseRing 3s ease-in-out infinite' }} />
-
-                {/* Spinning orbit rings behind phone */}
-                <div style={{
-                  position: 'absolute', width: 320, height: 320,
-                  top: '50%', left: '50%',
-                  border: '1px solid rgba(77,107,255,0.18)',
-                  borderRadius: '50%',
-                  animation: 'spinC1 12s linear infinite',
-                  transform: 'translate(-50%,-50%)',
-                  zIndex: 1,
-                }} />
-                <div style={{
-                  position: 'absolute', width: 380, height: 380,
-                  top: '50%', left: '50%',
-                  border: '1px dashed rgba(77,107,255,0.1)',
-                  borderRadius: '50%',
-                  animation: 'spinC2 18s linear infinite',
-                  transform: 'translate(-50%,-50%)',
-                  zIndex: 1,
-                }} />
-
-                {/* Phone */}
-                <div className="phone">
-                  <div className="phone__screen">
-                    <div className="phone__notch" />
-                    <div className="phone__photo" />
-                    <div className="phone__scrim" />
-                    {/* Grid overlay */}
-                    <div className="screen__grid" />
-                    {/* Sweep */}
-                    <div className="scan-sweep" />
-                    {/* AR ring overlays */}
-                    <div style={{
-                      position: 'absolute', width: 100, height: 100, borderRadius: '50%',
-                      border: '1.5px solid rgba(77,107,255,0.6)',
-                      top: '38%', left: '50%', transform: 'translate(-50%,-50%)',
-                      animation: 'pulseRing 2.2s ease-in-out infinite',
-                    }} />
-                    <div style={{
-                      position: 'absolute', width: 70, height: 70, borderRadius: '50%',
-                      border: '1px solid rgba(124,146,255,0.4)',
-                      top: '38%', left: '50%', transform: 'translate(-50%,-50%)',
-                      animation: 'pulseRing 2.2s ease-in-out infinite',
-                      animationDelay: '-1.1s',
-                    }} />
-                    {/* Central orb */}
-                    <div style={{
-                      position: 'absolute', width: 22, height: 22, borderRadius: '50%',
-                      background: 'radial-gradient(circle, #7C92FF, #4D6BFF)',
-                      boxShadow: '0 0 20px rgba(77,107,255,0.8)',
-                      top: '38%', left: '50%', transform: 'translate(-50%,-50%)',
-                    }} />
-                    {/* Bottom scrim — minimal AR status indicator only */}
-                    <div style={{ position: 'absolute', bottom: 20, left: 14, right: 14 }}>
-                      <div style={{ fontFamily: 'var(--font-mono)', fontSize: '0.6rem', letterSpacing: '0.1em', textTransform: 'uppercase', color: 'rgba(124,146,255,0.8)' }}>
-                        {t('ar.phone.label')}
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Floating AR chips — placed directly over the phone screen
-                    as if they were AR UI elements rendered on top of the
-                    camera view, not labels next to it. */}
-                <div className="ar-chip" style={{ top: '14%', right: '8%', animation: 'floatA 4s ease-in-out infinite' }}>
-                  {t('ar.chip.video')}
-                </div>
-                <div className="ar-chip" style={{ top: '46%', left: '14%', animation: 'floatB 5s ease-in-out infinite', animationDelay: '0.8s' }}>
-                  {t('ar.chip.message')}
-                </div>
-                <div className="ar-chip" style={{ bottom: '20%', right: '12%', animation: 'floatA 4.5s ease-in-out infinite', animationDelay: '1.6s' }}>
-                  {t('ar.chip.3d')}
-                </div>
+              {/* HLS loop video */}
+              <div className="ar__video-wrap" data-reveal data-reveal-delay="2">
+                <HLSVideoLoop
+                  src="https://storage.googleapis.com/wireon/qr%20code%20presentation/master.m3u8"
+                  style={{
+                    width: '100%',
+                    height: '100%',
+                    objectFit: 'cover',
+                    borderRadius: 'inherit',
+                    display: 'block',
+                  }}
+                />
               </div>
             </div>
           </div>
