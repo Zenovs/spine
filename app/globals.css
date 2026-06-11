@@ -892,12 +892,13 @@ hr.rule { border: none; border-top: 1px solid var(--line); margin: 0; }
 ───────────────────────────────────────────── */
 .ar__video-wrap {
   position: relative;
-  width: 100%;
-  aspect-ratio: 16 / 9;
+  width: min(340px, 100%);
+  aspect-ratio: 9 / 16;
   border-radius: 12px;
   overflow: hidden;
   background: var(--paper-2);
   box-shadow: 0 0 0 1px var(--line), 0 24px 64px rgba(0,0,0,0.45), 0 0 60px var(--glow);
+  justify-self: center;
 }
 
 /* ─────────────────────────────────────────────
